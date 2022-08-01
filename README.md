@@ -10,6 +10,7 @@ This component uses the simple yet powerful **HTTP(S)** protocol to periodically
 ### Supported Areas:
 Starting from the v1.0.0 version, the component has added support for the areas listed below:
 > Note: There are some EVN Branches (with corresponding areas) that **do not** need authentication/EVN credential to get the e-data from EVN Servers.
+
 | EVN Branch | Vietnam Area | EVN Account Required |
 | —- | —- | —- |
 | EVNHCMC | Ho Chi Minh City | ☑️ |
