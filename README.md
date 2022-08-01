@@ -27,7 +27,7 @@ Starting from the v1.0.0 version, the component has added support for the areas 
     > HACS > Integrations > `EVN Data Fetcher ` > Update / Redownload
 
 ### Method 2: Manual installation via Samba / SFTP
-> Download and copy `custom_components/ha_evn` folder to `custom_components` folder in your HomeAssistant config folder
+> Download and copy `custom_components/nestup_evn` folder to `custom_components` folder in your HomeAssistant config folder
 
 [hacs]: https://github.com/custom-components/hacs
 [hacsbadge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge

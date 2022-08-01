@@ -27,7 +27,7 @@ Bắt đầu từ phiên bản v1.0.0, công cụ đã hỗ trợ cho các vùng
     > HACS > Integrations > `EVN Data Fetcher ` > Update / Redownload
 
 #### Cách 2: Cài đặt thủ công thông qua Samba / SFTP / HTTPS
-> Tải và sao chép thư mục `custom_components/ha_evn` vào thư mục `custom_components` trong đường dẫn thư mục cài đặt của Home Assistant
+> Tải và sao chép thư mục `custom_components/nestup_evn` vào thư mục `custom_components` trong đường dẫn thư mục cài đặt của Home Assistant
 
 [hacs]: https://github.com/custom-components/hacs
 [hacsbadge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge

@@ -1,7 +1,7 @@
 {
   "domain": "nestup_evn",
   "name": "EVN Data Fetcher",
-  "documentation": "https://github.com/trvqhuy/ha-evn/",
+  "documentation": "https://github.com/trvqhuy/nestup_evn/",
   "dependencies": [],
   "issue_tracker": "https://github.com/trvqhuy/nestup_evn/issues",
   "codeowners": ["@trvqhuy"],
