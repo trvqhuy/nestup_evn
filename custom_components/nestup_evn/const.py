@@ -8,7 +8,7 @@ from homeassistant.const import (
 
 POLLING_INTERVAL_IN_MINS = 5
 
-DOMAIN = "ha_evn"
+DOMAIN = "nestup_evn"
 CONF_COMPONENT_NAME = "EVN Data"
 
 CONF_DEVICE_NAME = "EVN Bot"
