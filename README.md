@@ -2,7 +2,7 @@
 
 # Vietnam EVN Data Fetcher for HomeAssistant
 
-English | [Tiếng Việt](https://github.com/al-one/hass-xiaomi-miot/blob/master/README_zh.md)
+English | [Tiếng Việt](https://github.com/trvqhuy/ha-evn/blob/main/README.md)
 
 This component uses the simple yet powerful **HTTP(S)** protocol to periodically fetch the latest e-consumption data from [EVN Endpoint](https://www.evn.com.vn) into [Home Assistant](https://www.home-assistant.io) using **requests** module, and currently supports few regions in Vietnam (see the supported areas below). Hence, it supports HA Web UI, and you can easily integrate monitoring devices into HA without configuring yaml.
 
