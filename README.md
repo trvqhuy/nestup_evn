@@ -4,13 +4,14 @@
 
 English | [Tiếng Việt](https://github.com/al-one/hass-xiaomi-miot/blob/master/README_zh.md)
 
-This component uses the simple yet powerful **HTTP(S)** protocol to periodically fetch the latest e-consumption data from [EVN Endpoint](https://www.evn.com.vn) into [Home Assistant](https://www.home-assistant.io) using **requests** module, and currently supports few regions in Vietnam (see the supported areas below).Hence, it supports HA Web UI, and you can easily integrate monitoring devices into HA without configuring yaml.
+This component uses the simple yet powerful **HTTP(S)** protocol to periodically fetch the latest e-consumption data from [EVN Endpoint](https://www.evn.com.vn) into [Home Assistant](https://www.home-assistant.io) using **requests** module, and currently supports few regions in Vietnam (see the supported areas below). Hence, it supports HA Web UI, and you can easily integrate monitoring devices into HA without configuring yaml.
 
 ## Before Installation
 ### Supported Areas:
 Starting from the v1.0.0 version, the component has added support for the areas listed below:
 > Note: There are some EVN Branches (with corresponding areas) that **do not** need authentication/EVN credential to get the e-data from EVN Servers.
 
+<div align="center">
 | EVN Branch | Vietnam Area | EVN Account Required |
 | --- | --- | --- |
 | EVNHCMC | Ho Chi Minh City | ☑️ |
