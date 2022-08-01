@@ -2,7 +2,7 @@
 [![Code Style][blackbadge]][black]
 [![Project Maintenance][maintenance-shield]][maintenance]
 
-# Vietnam EVN Data Fetcher for HomeAssistant
+# Vietnam EVN Data Fetcher for HA
 
 English | [Tiếng Việt](https://github.com/trvqhuy/ha-evn/blob/main/README_vn.md)
 
@@ -11,14 +11,13 @@ This component uses the simple yet powerful **HTTP(S)** protocol to periodically
 Hence, it supports HA Web UI, and you can easily integrate monitoring devices into HA without configuring yaml.
 
 ## Before Installation
-### Supported Areas:
 Starting from the v1.0.0 version, the component has added support for the areas listed below:
 > Note: There are some EVN Branches (with corresponding areas) that **do not** need Authentication / EVN Credential to get the E-data from EVN Servers.
 
-| EVN Branch | Vietnam Area | EVN Account Required |
-|:---:|:---:|:---:|
-| EVNHCMC | Ho Chi Minh City | ☑️ |
-| EVNSPC | Southern Vietnam |   |
+| EVN Branch | Vietnam Area | EVN Account Required |  Account Support |
+|:---:|:---:|:---:|:---:|
+| EVNHCMC | Ho Chi Minh City | ☑️ | [Link](https://cskh.evnhcmc.vn/lienhe)
+| EVNSPC | Southern Vietnam |   | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
 
 ## Installation
 ### Method 1: Installation via [HACS](https://hacs.xyz)
