@@ -4,7 +4,9 @@
 
 English | [Tiếng Việt](https://github.com/trvqhuy/ha-evn/blob/main/README_vn.md)
 
-This component uses the simple yet powerful **HTTP(S)** protocol to periodically fetch the latest e-consumption data from [EVN Endpoint](https://www.evn.com.vn) into [Home Assistant](https://www.home-assistant.io) using **requests** module, and currently supports few regions in Vietnam (see the supported areas below). Hence, it supports HA Web UI, and you can easily integrate monitoring devices into HA without configuring yaml.
+This component uses the simple yet powerful **HTTP(S)** protocol to periodically fetch the latest e-consumption data from [EVN Endpoint](https://www.evn.com.vn) into [Home Assistant](https://www.home-assistant.io) using **requests** module, and currently supports few regions in Vietnam (see the supported areas below). 
+
+Hence, it supports HA Web UI, and you can easily integrate monitoring devices into HA without configuring yaml.
 
 ## Before Installation
 ### Supported Areas:
@@ -17,11 +19,11 @@ Starting from the v1.0.0 version, the component has added support for the areas 
 | EVNSPC | Southern Vietnam |   |
 
 ## Installation
-#### Method 1: Installation via [HACS](https://hacs.xyz)
+### Method 1: Installation via [HACS](https://hacs.xyz)
 - First installation
     > HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > Download this repository
 - Update component
     > HACS > Integrations > `EVN Data Fetcher ` > Update / Redownload
 
-#### Method 2: Manual installation via Samba / SFTP
+### Method 2: Manual installation via Samba / SFTP
 > Download and copy `custom_components/ha_evn` folder to `custom_components` folder in your HomeAssistant config folder
