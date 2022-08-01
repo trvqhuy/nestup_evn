@@ -13,7 +13,7 @@ Starting from the v1.0.0 version, the component has added support for the areas 
 
 <div align="center">
 | EVN Branch | Vietnam Area | EVN Account Required |
-| --- | --- | --- |
+|:---:|:---:|:---:|
 | EVNHCMC | Ho Chi Minh City | ☑️ |
 | EVNSPC | Southern Vietnam |   |
 
