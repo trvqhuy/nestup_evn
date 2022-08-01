@@ -21,7 +21,7 @@ from .const import (
     DOMAIN,
     VIETNAM_EVN_AREA,
 )
-from . import ha_evn
+from . import nestup_evn
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     def __init__(self):
-        self._api = ha_evn.EVNAPI()
+        self._api = nestup_evn.EVNAPI()
         self._user_data = {}
 
     async def async_step_connect(

@@ -12,7 +12,7 @@ from .const import (
     DOMAIN,
     POLLING_INTERVAL_IN_MINS,
 )
-from . import ha_evn
+from . import nestup_evn
 
 from datetime import timedelta
 
@@ -28,8 +28,8 @@ async def async_setup_entry(
 
     component = hass.data[DOMAIN][config_entry.entry_id]
 
-    evn_api = ha_evn.EVNAPI()
-    data_probe = ha_evn.EVNData(config_entry.data, evn_api)
+    evn_api = nestup_evn.EVNAPI()
+    data_probe = nestup_evn.EVNData(config_entry.data, evn_api)
 
     new_devices = []
     for entity in DEVICE_ENTITIES:
