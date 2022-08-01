@@ -1,4 +1,6 @@
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![hacs][hacsbadge]][hacs]
+[![Code Style][blackbadge]][black]
+[![Project Maintenance][maintenance-shield]][maintenance]
 
 # Công cụ lấy dữ liệu điện tiêu thụ từ EVN Việt Nam dành cho HomeAssistant
 
@@ -26,3 +28,10 @@ Bắt đầu từ phiên bản v1.0.0, công cụ đã hỗ trợ cho các vùng
 
 #### Cách 2: Cài đặt thủ công thông qua Samba / SFTP / HTTPS
 > Tải và sao chép thư mục `custom_components/ha_evn` vào thư mục `custom_components` trong đường dẫn thư mục cài đặt của Home Assistant
+
+[hacs]: https://github.com/custom-components/hacs
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge
+[maintenance-shield]: https://img.shields.io/badge/MAINTAINER-%40TRVQHUY-orange%20?style=for-the-badge
+[maintenance]: https://github.com/trvqhuy
+[blackbadge]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
+[black]: https://github.com/ambv/black
