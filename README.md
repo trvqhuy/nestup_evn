@@ -1,4 +1,7 @@
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![hacs][hacsbadge]](hacs)
+[![Code Style][blackbadge]][black]
+[![Project Maintenance][maintenance-shield]](https://github.com/trvqhuy)
+
 
 # Vietnam EVN Data Fetcher for HomeAssistant
 
@@ -27,3 +30,9 @@ Starting from the v1.0.0 version, the component has added support for the areas 
 
 ### Method 2: Manual installation via Samba / SFTP
 > Download and copy `custom_components/ha_evn` folder to `custom_components` folder in your HomeAssistant config folder
+
+[hacs]: https://github.com/custom-components/hacs
+[hacsbadge]: https://img.shields.io/badge/HACS-Default-blue.svg?style=for-the-badge
+[maintenance-shield]: https://img.shields.io/badge/MAINTAINER-QUANG%20HUY%20%40TRVQHUY-orange%20?style=for-the-badge&logo=appveyor
+[blackbadge]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
+[black]: https://github.com/ambv/black
