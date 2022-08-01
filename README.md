@@ -31,7 +31,7 @@ Starting from the v1.0.0 version, the component has added support for the areas 
 > Download and copy `custom_components/ha_evn` folder to `custom_components` folder in your HomeAssistant config folder
 
 [hacs]: https://github.com/custom-components/hacs
-[hacsbadge]: https://img.shields.io/badge/HACS-Custom-blue.svg?style=for-the-badge
+[hacsbadge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge
 [maintenance-shield]: https://img.shields.io/badge/MAINTAINER-%40TRVQHUY-orange%20?style=for-the-badge
 [maintenance]: https://github.com/trvqhuy
 [blackbadge]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
