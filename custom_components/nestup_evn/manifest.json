@@ -1,0 +1,16 @@
+{
+  "domain": "nestup_evn",
+  "name": "EVN Data Fetcher",
+  "documentation": "https://github.com/trvqhuy/ha-evn/",
+  "dependencies": [],
+  "codeowners": ["@trvqhuy"],
+  "requirements": [
+    "beautifulsoup4==4.11.1",
+    "homeassistant==2022.7.7",
+    "requests==2.25.1",
+    "urllib3==1.26.5",
+    "voluptuous==0.13.1"
+  ],
+  "iot_class": "local_polling",
+  "version": "0.1.0"
+}
