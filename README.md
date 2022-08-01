@@ -12,7 +12,7 @@ Starting from the v1.0.0 version, the component has added support for the areas 
 > Note: There are some EVN Branches (with corresponding areas) that **do not** need authentication/EVN credential to get the e-data from EVN Servers.
 
 | EVN Branch | Vietnam Area | EVN Account Required |
-| —- | —- | —- |
+| --- | --- | --- |
 | EVNHCMC | Ho Chi Minh City | ☑️ |
 | EVNSPC | Southern Vietnam |   |
 
