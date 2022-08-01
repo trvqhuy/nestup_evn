@@ -2,7 +2,7 @@
 
 # Công cụ lấy dữ liệu điện tiêu thụ từ EVN Việt Nam dành cho HomeAssistant
 
-[English](https://github.com/trvqhuy/ha-evn/blob/main/README.md)| Tiếng Việt
+[English](https://github.com/trvqhuy/ha-evn/blob/main/README.md) | Tiếng Việt
 
 Từ việc sử dụng các phương thức có sẵn từ module **Requests** thông qua giao thức **HTTP(S)** cơ bản, công cụ có thể theo dõi dữ liệu điện năng tiêu thụ từ [EVN](https://www.evn.com.vn) trực tiếp trong [Home Assistant](https://www.home-assistant.io), hiện tại đã hỗ trợ cho một số vùng miền cùng với chi nhánh EVN tương ứng tại Việt Nam (xem thêm danh sách phía dưới). 
 Công cụ hỗ trợ xem trực tiếp UI từ HomeAssistant Website, dễ dàng quản lí các thông số điện tiêu thụ thông qua các thiết bị theo dõi tập trung, và có thể cài đặt bằng UI không cần chỉnh sửa trực tiếp bằng file ‘configuration.yaml’
