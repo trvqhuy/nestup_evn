@@ -1,27 +1,27 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
-# Vietnam EVN Data Fetcher for HomeAssistant
+# Công cụ lấy dữ liệu điện tiêu thụ từ EVN Việt Nam dành cho HomeAssistant
 
-English | [Tiếng Việt](https://github.com/al-one/hass-xiaomi-miot/blob/master/README_zh.md)
+[English](https://github.com/trvqhuy/ha-evn/blob/main/README.md)| Tiếng Việt
 
-This component uses the simple yet powerful **HTTP(S)** protocol to periodically fetch the latest e-consumption data from [EVN Endpoint](https://www.evn.com.vn) into [Home Assistant](https://www.home-assistant.io) using **requests** module, and currently supports few regions in Vietnam (see the supported areas below). Hence, it supports HA Web UI, and you can easily integrate monitoring devices into HA without configuring yaml.
+Từ việc sử dụng các phương thức có sẵn từ module **Requests** thông qua giao thức **HTTP(S)** cơ bản, công cụ có thể theo dõi dữ liệu điện năng tiêu thụ từ [EVN](https://www.evn.com.vn) trực tiếp trong [Home Assistant](https://www.home-assistant.io), hiện tại đã hỗ trợ cho một số vùng miền cùng với chi nhánh EVN tương ứng tại Việt Nam (xem thêm danh sách phía dưới). 
+Công cụ hỗ trợ xem trực tiếp UI từ HomeAssistant Website, dễ dàng quản lí các thông số điện tiêu thụ thông qua các thiết bị theo dõi tập trung, và có thể cài đặt bằng UI không cần chỉnh sửa trực tiếp bằng file ‘configuration.yaml’
 
-## Before Installation
-### Supported Areas:
-Starting from the v1.0.0 version, the component has added support for the areas listed below:
-> Note: There are some EVN Branches (with corresponding areas) that **do not** need authentication/EVN credential to get the e-data from EVN Servers.
+## Trước khi cài đặt
+Bắt đầu từ phiên bản v1.0.0, công cụ đã hỗ trợ cho các vùng miền thuộc Việt Nam cùng với chi nhánh EVN tương ứng ở bảng dưới:
+> Ghi chú: Có một số vùng miền **không cần** sử dụng tài khoản EVN để nhận dữ liệu điện năng tiêu thụ từ máy chủ EVN (xem rõ ở bảng dưới)
 
-| EVN Branch | Vietnam Area | EVN Account Required |
+| Chi nhánh EVN | Khu vực | Cần có tài khoản EVN |
 |:---:|:---:|:---:|
-| EVNHCMC | Ho Chi Minh City | ☑️ |
-| EVNSPC | Southern Vietnam |   |
+| EVNHCMC | TP. Hồ Chí Minh | ☑️ |
+| EVNSPC | Các khu vực thuộc miền Nam |   |
 
-## Installation
-#### Method 1: Installation via [HACS](https://hacs.xyz)
-- First installation
+## Cách cài đặt
+#### Cách 1: Cài đặt thông qua [HACS](https://hacs.xyz)
+- Đối với lần cài đặt đầu tiên:
     > HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > Download this repository
-- Update component
+- Cách cập nhật công cụ:
     > HACS > Integrations > `EVN Data Fetcher ` > Update / Redownload
 
-#### Method 2: Manual installation via Samba / SFTP
-> Download and copy `custom_components/ha_evn` folder to `custom_components` folder in your HomeAssistant config folder
+#### Cách 2: Cài đặt thủ công thông qua Samba / SFTP / HTTPS
+> Tải và sao chép thư mục `custom_components/ha_evn` vào thư mục `custom_components` trong đường dẫn thư mục cài đặt của Home Assistant
