@@ -1,7 +1,5 @@
 {
   "name": "EVN Data Fetcher",
-  "hacs": "1.0.0",
-  "homeassistant": "0.118.0",
   "render_readme": true,
   "country": ["VN"]
 }
