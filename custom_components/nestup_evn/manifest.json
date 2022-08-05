@@ -7,10 +7,10 @@
   "dependencies": [],
   "codeowners": ["@trvqhuy"],
   "requirements": [
-     "beautifulsoup4==4.11.1",
-     "requests==2.25.1",
-     "urllib3==1.26.5",
-     "voluptuous==0.13.1"
+     "beautifulsoup4",
+     "requests",
+     "urllib3",
+     "voluptuous"
   ],
   "iot_class": "cloud_polling",
   "version": "1.1.4"
