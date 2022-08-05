@@ -15,7 +15,6 @@ from .const import (
 from . import nestup_evn
 
 from datetime import timedelta
-
 SCAN_INTERVAL = timedelta(minutes=POLLING_INTERVAL_IN_MINS)
 
 

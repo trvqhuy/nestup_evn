@@ -6,7 +6,7 @@ from homeassistant.const import (
     ENERGY_KILO_WATT_HOUR,
 )
 
-POLLING_INTERVAL_IN_MINS = 5
+POLLING_INTERVAL_IN_MINS = 15
 
 DOMAIN = "nestup_evn"
 CONF_COMPONENT_NAME = "EVN Data"

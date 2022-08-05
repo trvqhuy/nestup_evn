@@ -5,11 +5,9 @@ from bs4 import BeautifulSoup
 from homeassistant.util import Throttle
 
 import logging
-
 _LOGGER = logging.getLogger(__name__)
 
 import urllib3
-
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 from .const import (
@@ -38,9 +36,7 @@ from .const import (
 
 from datetime import timedelta
 from homeassistant.util import Throttle
-
 SCAN_INTERVAL = timedelta(minutes=POLLING_INTERVAL_IN_MINS)
-
 
 class EVNData:
     def __init__(self, dataset, api):
