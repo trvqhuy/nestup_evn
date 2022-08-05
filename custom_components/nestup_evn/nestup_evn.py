@@ -4,11 +4,6 @@ from typing import Any
 from bs4 import BeautifulSoup
 from homeassistant.util import Throttle
 
-from datetime import timedelta
-from homeassistant.util import Throttle
-
-SCAN_INTERVAL = timedelta(minutes=POLLING_INTERVAL_IN_MINS)
-
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -40,6 +35,11 @@ from .const import (
     VIETNAM_ECOST_VAT,
     VIETNAM_EVN_AREA,
 )
+
+from datetime import timedelta
+from homeassistant.util import Throttle
+
+SCAN_INTERVAL = timedelta(minutes=POLLING_INTERVAL_IN_MINS)
 
 
 class EVNData:
