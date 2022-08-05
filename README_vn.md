@@ -2,7 +2,7 @@
 [![Code Style][blackbadge]][black]
 [![Project Maintenance][maintenance-shield]][maintenance]
 
-# Công cụ lấy dữ liệu điện tiêu thụ từ EVN Việt Nam dành cho HomeAssistant
+# Công cụ theo dõi dữ liệu điện tiêu thụ từ EVN Việt Nam dành cho HomeAssistant
 
 [English](https://github.com/trvqhuy/ha-evn/blob/main/README.md) | Tiếng Việt
 
