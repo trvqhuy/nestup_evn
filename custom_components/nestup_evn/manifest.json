@@ -3,8 +3,8 @@
   "name": "EVN Data Fetcher",
   "config_flow": true,
   "documentation": "https://github.com/trvqhuy/nestup_evn/",
-  "dependencies": [],
   "issue_tracker": "https://github.com/trvqhuy/nestup_evn/issues",
+  "dependencies": [],
   "codeowners": ["@trvqhuy"],
   "requirements": [
      "beautifulsoup4==4.11.1",
@@ -13,5 +13,5 @@
      "voluptuous==0.13.1"
   ],
   "iot_class": "cloud_polling",
-  "version": "1.1.2"
+  "version": "1.1.4"
 }
