@@ -1,6 +1,7 @@
 {
   "domain": "nestup_evn",
   "name": "EVN Data Fetcher",
+  "config_flow": true,
   "documentation": "https://github.com/trvqhuy/nestup_evn/",
   "dependencies": [],
   "issue_tracker": "https://github.com/trvqhuy/nestup_evn/issues",
