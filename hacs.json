@@ -1,6 +1,5 @@
 {
   "name": "EVN Data Fetcher",
   "render_readme": true,
-  "domains": ["sensor"],
   "country": ["VN"]
 }
