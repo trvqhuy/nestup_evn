@@ -8,10 +8,6 @@ from .const import CONF_CUSTOMER_ID, DOMAIN
 
 PLATFORMS: list[str] = ["sensor"]
 
-async def async_setup(hass: HomeAssistant, config: Config):
-    """Set up this integration using YAML is not supported."""
-    return True
-
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = Component(
         hass, entry.data[CONF_CUSTOMER_ID]
