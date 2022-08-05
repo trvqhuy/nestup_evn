@@ -1,5 +1,4 @@
 {
   "name": "EVN Data Fetcher",
-  "render_readme": true,
-  "country": ["VN"]
+  "render_readme": true
 }
