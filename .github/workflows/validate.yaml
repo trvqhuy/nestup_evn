@@ -6,16 +6,25 @@ on:
   schedule:
     - cron:  '0 0 * * *'
 
-jobs:
-  validate:
+jobs: 
+  hacs:
     runs-on: "ubuntu-latest"
+    name: HACS
     steps:
-      - uses: "actions/checkout@v2"
+      - name: Check out the repository
+        uses: "actions/checkout@v3.0.2"
 
-      - name: HACS Action
-        uses: "hacs/action@main"
+      - name: HACS validation
+        uses: "hacs/action@22.5.0"
         with:
-          category: integration
+          category: "integration"
 
-      - name: HASS validation
+  hassfest:
+    runs-on: "ubuntu-latest"
+    name: Hassfest
+    steps:
+      - name: Check out the repository
+        uses: "actions/checkout@v3.0.2"
+
+      - name: Hassfest validation
         uses: "home-assistant/actions/hassfest@master"
