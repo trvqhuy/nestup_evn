@@ -1,22 +1,23 @@
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .sensor import Component
-from .const import CONF_CUSTOMER_ID, DOMAIN
+from .const import DOMAIN
 
-PLATFORMS: list[str] = ["sensor"]
+PLATFORMS = [Platform.SENSOR]
+
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = Component(
-        hass, entry.data[CONF_CUSTOMER_ID]
-    )
+    """Establish connection with EVN Cloud."""
+    hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {}).update(entry.data)
     hass.config_entries.async_setup_platforms(entry, PLATFORMS)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)

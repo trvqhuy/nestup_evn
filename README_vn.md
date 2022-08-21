@@ -24,7 +24,7 @@ Bắt đầu từ phiên bản v1.0.0, công cụ đã hỗ trợ cho các vùng
 - Đối với lần cài đặt đầu tiên:
     > HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > Download this repository
 - Cách cập nhật công cụ:
-    > HACS > Integrations > `EVN Data Fetcher ` > Update / Redownload
+    > HACS > Integrations > `EVN Data Fetcher` > Update / Redownload
 
 #### Cách 2: Cài đặt thủ công thông qua Samba / SFTP / HTTPS
 > Tải và sao chép thư mục `custom_components/nestup_evn` vào thư mục `custom_components` trong đường dẫn thư mục cài đặt của Home Assistant

@@ -1,109 +1,151 @@
+from typing import Any
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+)
+
+from . import nestup_evn
 from .const import (
+    CONF_USERNAME,
+    CONF_PASSWORD,
+    CONF_AREA,
+    CONF_CUSTOMER_ID,
     CONF_DEVICE_MANUFACTURER,
     CONF_DEVICE_MODEL,
+    CONF_DEVICE_NAME,
     CONF_DEVICE_SW_VERSION,
-    DEVICE_ENTITIES,
+    CONF_MONTHLY_START,
+    CONF_SUCCESS,
+    DEFAULT_SCAN_INTERVAL,
     DOMAIN,
-    POLLING_INTERVAL_IN_MINS,
 )
-from . import nestup_evn
 
-from datetime import timedelta
-SCAN_INTERVAL = timedelta(minutes=POLLING_INTERVAL_IN_MINS)
+from .types import EVN_SENSORS, VIETNAM_EVN_AREA, EVNSensorEntityDescription
+
+import logging
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,
-    config_entry: ConfigEntry,
-    async_add_entities: AddEntitiesCallback,
-) -> None:
-    """Set up the EVN Component."""
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
+):
+    """Setup the sensor platform."""
 
-    component = hass.data[DOMAIN][config_entry.entry_id]
+    entry_config = hass.data[DOMAIN][entry.entry_id]
 
-    evn_api = nestup_evn.EVNAPI()
-    data_probe = nestup_evn.EVNData(config_entry.data, evn_api)
+    evn_api = nestup_evn.EVNAPI(hass)
+    evn_device = EVNDevice(entry_config, evn_api)
 
-    new_devices = []
-    for entity in DEVICE_ENTITIES:
-        new_devices.append(EVNSensor(component.device, data_probe, entity))
+    await evn_device.async_create_coordinator(hass)
 
-    if new_devices:
-        async_add_entities(new_devices, True)
+    entities = []
+    entities.extend([EVNSensor(evn_device, description) for description in EVN_SENSORS])
+
+    async_add_entities(entities, True)
 
 
-class Component:
-    def __init__(self, hass: HomeAssistant, host: str) -> None:
-        self._host = host
-        self._hass = hass
-        self._name = host
-        self._id = f"{host.lower()}_component"
-        self.device = Device(
-            f"evn_monitor_{self._id}", f"EVN Monitor: {self._name}", self
+class EVNDevice:
+    """EVN Device Instance"""
+
+    def __init__(self, dataset, api: nestup_evn.EVNAPI) -> None:
+        """Construct a device wrapper."""
+
+        self._name = f"{CONF_DEVICE_NAME}: {dataset[CONF_CUSTOMER_ID]}"
+        self._coordinator: DataUpdateCoordinator | None = None
+
+        self._username = dataset[CONF_USERNAME] or None
+        self._password = dataset[CONF_PASSWORD] or None
+
+        self._area_name = dataset[CONF_AREA]
+        self._customer_id = dataset[CONF_CUSTOMER_ID]
+        self._monthly_start = dataset[CONF_MONTHLY_START]
+
+        self._api = api
+        self._data = {}
+
+    async def update(self) -> dict[str, Any]:
+        if self._area_name == VIETNAM_EVN_AREA[0].name:
+            login_state = await self._api.login(
+                self._area_name, self._username, self._password
+            )
+
+            if login_state != CONF_SUCCESS:
+                return
+
+        _LOGGER.debug(
+            "[EVN Monitor] Updating data for EVN Customer ID %s", self._customer_id
         )
-        self.online = True
+
+        self._data = await self._api.request_update(
+            self._area_name, self._customer_id, self._monthly_start
+        )
+
+        return self._data
+
+    async def _async_update(self):
+        """Pull the latest data from EVN."""
+        await self.update()
+
+    async def async_create_coordinator(self, hass: HomeAssistant) -> None:
+        """Get the coordinator for a specific device."""
+        if self._coordinator:
+            return
+
+        coordinator = DataUpdateCoordinator(
+            hass,
+            _LOGGER,
+            name=f"{DOMAIN}-{self._customer_id}",
+            update_method=self._async_update,
+            update_interval=DEFAULT_SCAN_INTERVAL,
+        )
+        await coordinator.async_refresh()
+        self._coordinator = coordinator
 
     @property
-    def component_id(self) -> str:
-        return self._id
-
-
-class Device:
-    def __init__(self, device_id: str, name: str, component: Component) -> None:
-        self._id = device_id
-        self.name = name
-
-        self.sw_version = CONF_DEVICE_SW_VERSION
-        self.model = CONF_DEVICE_MODEL
-        self.manufacturer = CONF_DEVICE_MANUFACTURER
+    def info(self) -> DeviceInfo:
+        """Return a device description for device registry."""
+        return DeviceInfo(
+            name=self._name,
+            identifiers={(DOMAIN, self._customer_id)},
+            manufacturer=CONF_DEVICE_MANUFACTURER,
+            sw_version=CONF_DEVICE_SW_VERSION,
+            model=CONF_DEVICE_MODEL,
+        )
 
     @property
-    def device_id(self) -> str:
-        return self._id
-
-    @property
-    def online(self) -> bool:
-        return True
+    def coordinator(self) -> DataUpdateCoordinator | None:
+        """Return coordinator associated."""
+        return self._coordinator
 
 
-class EVNSensor(SensorEntity):
-    def __init__(self, device, probe, entityInfo):
-        self._probe = probe
+class EVNSensor(CoordinatorEntity, SensorEntity):
+    """EVN Sensor Instance"""
+
+    def __init__(self, device: EVNDevice, description: EVNSensorEntityDescription):
+        super().__init__(device.coordinator)
+
         self._device = device
-        self._id = entityInfo.id
+        self._attr_unique_id = f"{device._customer_id}_{description.key}"
+        self._attr_name = f"{device._name} {description.name}"
 
-        self._attr_unique_id = f"{self._device.device_id}_{entityInfo.id}"
-        self._attr_name = f"{self._device.name} {entityInfo.friendly_name}"
-        self._attr_device_class = entityInfo.entity_class
-        self._attr_native_unit_of_measurement = entityInfo.unit
-        self._icon = entityInfo.icon
-
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self._device.device_id)},
-            manufacturer=self._device.manufacturer,
-            name=self._device.name,
-            sw_version=self._device.sw_version,
-            model=self._device.model,
-        )
+        self.entity_description = description
 
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        return self._probe.get_data(self._id)
-
-    def update(self):
-        """Get the latest data from the EVN API and updates the state."""
-        self._probe.update()
+        return self.entity_description.value_fn(self._device._data)
 
     @property
-    def icon(self):
-        return self._icon
+    def device_info(self):
+        """Return a device description for device registry."""
+        return self._device.info
 
     def available(self) -> bool:
-        return self._device.online
+        return self._device._data["status"] == CONF_SUCCESS

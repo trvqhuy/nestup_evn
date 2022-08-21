@@ -1,25 +1,24 @@
-import json, requests
+import json
 from datetime import datetime
 from typing import Any
 from bs4 import BeautifulSoup
-from homeassistant.util import Throttle
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import (
+    async_create_clientsession,
+    async_get_clientsession,
+)
+
+import ssl
 
 import logging
+
 _LOGGER = logging.getLogger(__name__)
 
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
 from .const import (
-    CONF_AREA,
-    CONF_CUSTOMER_ID,
     CONF_ERR_CANNOT_CONNECT,
     CONF_ERR_INVALID_AUTH,
     CONF_ERR_UNKNOWN,
-    CONF_MONTHLY_START,
-    CONF_PASSWORD,
     CONF_SUCCESS,
-    CONF_USERNAME,
     ID_ECON_PER_DAY,
     ID_ECON_PER_MONTH,
     ID_ECOST_PER_DAY,
@@ -27,63 +26,26 @@ from .const import (
     ID_FROM_DATE,
     ID_LATEST_UPDATE,
     ID_TO_DATE,
-    POLLING_INTERVAL_IN_MINS,
     VIETNAM_ECOST_PARAMS,
     VIETNAM_ECOST_STAGES,
     VIETNAM_ECOST_VAT,
-    VIETNAM_EVN_AREA,
 )
 
-from datetime import timedelta
-from homeassistant.util import Throttle
-SCAN_INTERVAL = timedelta(minutes=POLLING_INTERVAL_IN_MINS)
-
-class EVNData:
-    def __init__(self, dataset, api):
-
-        if CONF_USERNAME in dataset:
-            self._username = dataset[CONF_USERNAME]
-            self._password = dataset[CONF_PASSWORD]
-        else:
-            self._username = None
-            self._password = None
-
-        self._area_name = dataset[CONF_AREA]
-        self._customer_id = dataset[CONF_CUSTOMER_ID]
-        self._monthly_start = dataset[CONF_MONTHLY_START]
-
-        self._api = api
-        self._data = {}
-
-    @Throttle(SCAN_INTERVAL)
-    def update(self):
-        if self._area_name == VIETNAM_EVN_AREA[0].name:
-            if (
-                self._api.login(self._area_name, self._username, self._password)
-                != CONF_SUCCESS
-            ):
-                return
-
-        _LOGGER.debug(
-            "[HA EVN Monitor] Updating data for ID %s (Username %s)", self._customer_id
-        )
-
-        self._data = self._api.request_update(
-            self._area_name, self._customer_id, self._monthly_start
-        )
-
-    def get_data(self, variable: Any) -> Any:
-        """Get saved EVN data with specific variable"""
-        return self._data.get(variable)
+from .types import VIETNAM_EVN_AREA
 
 
 class EVNAPI:
-    def __init__(self):
-        self._session = requests.Session()
-        self._area_name = ""
-        self._test = 0
+    def __init__(self, hass: HomeAssistant, is_new_session=False):
 
-    def login(self, area_name, username, password) -> str:
+        self._session = (
+            async_create_clientsession(hass)
+            if is_new_session
+            else async_get_clientsession(hass)
+        )
+
+        self._area_name = ""
+
+    async def login(self, area_name, username, password) -> str:
         """Create EVN login session corresponding with a specific area"""
         self._area_name = [area for area in VIETNAM_EVN_AREA if area.name == area_name][
             0
@@ -91,21 +53,26 @@ class EVNAPI:
 
         payload = {"u": username, "p": password}
 
-        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = "ALL:@SECLEVEL=1"
+        ssl_context = ssl.create_default_context()
+        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
 
-        resp = self._session.post(
-            url=self._area_name.evn_login_url, data=payload, verify=True
+        resp = await self._session.post(
+            url=self._area_name.evn_login_url, data=payload, ssl=ssl_context
         )
 
-        if resp.status_code != 200:
-            _LOGGER.error(f"Cannot connect to EVN Server while loging in - {resp.text}")
+        if resp.status != 200:
+            _LOGGER.error(
+                f"Cannot connect to EVN Server while loging in: status code {resp.status}"
+            )
             return CONF_ERR_CANNOT_CONNECT
 
+        res = await resp.text()
+
         try:
-            resp_json = json.loads(resp.text)
+            resp_json = json.loads(res)
         except Exception as error:
             _LOGGER.error(
-                f"Unable to fetch data from EVN Server while loging in - {error}"
+                f"Unable to fetch data from EVN Server while loging in: {error}"
             )
             return CONF_ERR_UNKNOWN
 
@@ -114,40 +81,45 @@ class EVNAPI:
         if (login_state == CONF_SUCCESS) or (login_state == "login"):
             return CONF_SUCCESS
 
-        _LOGGER.error(f"Unable to login into EVN Endpoint - {resp.text}")
+        _LOGGER.error(f"Unable to login into EVN Endpoint: {resp_json}")
         return CONF_ERR_INVALID_AUTH
 
-    def request_update_evnhcmc(self, customer_id, start_datetime, end_datetime):
+    async def request_update_evnhcmc(self, customer_id, start_datetime, end_datetime):
 
-        resp = self._session.post(
+        ssl_context = ssl.create_default_context()
+        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+
+        resp = await self._session.post(
             url=self._area_name.evn_data_request_url,
             data={
                 "input_makh": customer_id,
                 "input_tungay": start_datetime,
                 "input_denngay": end_datetime,
             },
-            verify=True,
+            ssl=ssl_context,
         )
 
-        if resp.status_code != 200:
+        if resp.status != 200:
             _LOGGER.error(
-                f"Cannot connect to EVN Server while requesting new data - {resp.text}"
+                f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
             )
-            return {"status": "error", "data": resp.text}
+            return {"status": "error", "data": resp.status}
 
         try:
-            resp_json = json.loads(resp.text)
+            res = await resp.text()
+            resp_json = json.loads(res)
+
         except Exception as error:
             _LOGGER.error(
-                f"Unable to fetch data from EVN Server while requesting new data - {error}"
+                f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
             return {"status": "error", "data": error}
 
         state = resp_json["state"]
 
         if state != CONF_SUCCESS:
-            _LOGGER.error(f"Cannot request new data from EVN Server - {resp.text}")
-            return {"status": "error", "data": resp.text}
+            _LOGGER.error(f"Cannot request new data from EVN Server: {resp_json}")
+            return {"status": state, "data": resp_json}
 
         return {
             "status": CONF_SUCCESS,
@@ -155,9 +127,12 @@ class EVNAPI:
             ID_ECON_PER_MONTH: float(resp_json["data"]["sanluong_tong"]["Tong"]),
         }
 
-    def request_update_evnspc(self, customer_id, start_datetime, end_datetime):
+    async def request_update_evnspc(self, customer_id, start_datetime, end_datetime):
 
-        resp = self._session.post(
+        ssl_context = ssl.create_default_context()
+        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+
+        resp = await self._session.post(
             url=self._area_name.evn_data_request_url,
             data={
                 "MaKhachHangChiSoChot": customer_id,
@@ -165,19 +140,28 @@ class EVNAPI:
                 "DenNgayChiSoChot": end_datetime.replace("/", "-"),
                 "check": "1",
             },
-            verify=False,
+            ssl=False,
         )
 
-        if resp.status_code != 200:
+        try:
+            res = await resp.text()
+
+        except Exception as error:
             _LOGGER.error(
-                f"Cannot connect to EVN Server while requesting new data - {resp.text}"
+                f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
-            return {"status": "error", "data": resp.text}
+            return {"status": "error", "data": error}
+
+        if resp.status != 200:
+            _LOGGER.error(
+                f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
+            )
+            return {"status": "error", "data": res}
 
         resp_json = {}
 
         try:
-            soup = BeautifulSoup(resp.content, "html.parser")
+            soup = BeautifulSoup(res, "html.parser")
             json_data = {}
 
             for index, data in enumerate(soup.find_all("td")):
@@ -192,12 +176,17 @@ class EVNAPI:
                     elif not (index % 3):
                         json_data = {}
                         json_data["date"] = item
-
         except Exception as error:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data - {error}"
             )
             return {"status": "error", "data": error}
+
+        if resp_json == {}:
+            _LOGGER.error(
+                f"Cannot request new data from EVN Server: Invalid EVN Customer ID"
+            )
+            return {"status": "error_ma_kh_deny", "data": resp_json}
 
         return {
             "status": CONF_SUCCESS,
@@ -205,7 +194,9 @@ class EVNAPI:
             ID_ECON_PER_MONTH: float(resp_json["total"]),
         }
 
-    def request_update(self, area_name, customer_id, monthly_start) -> dict[str, Any]:
+    async def request_update(
+        self, area_name, customer_id, monthly_start
+    ) -> dict[str, Any]:
         """Request new update from EVN Server, corresponding with the last session"""
 
         fetch_data = {}
@@ -213,14 +204,18 @@ class EVNAPI:
 
         if area_name == VIETNAM_EVN_AREA[0].name:
             from_date, to_date = generate_datetime(monthly_start)
-            fetch_data = self.request_update_evnhcmc(customer_id, from_date, to_date)
+            fetch_data = await self.request_update_evnhcmc(
+                customer_id, from_date, to_date
+            )
 
         elif area_name == VIETNAM_EVN_AREA[1].name:
             from_date, to_date = generate_datetime(monthly_start)
             self._area_name = [
                 area for area in VIETNAM_EVN_AREA if area.name == area_name
             ][0]
-            fetch_data = self.request_update_evnspc(customer_id, from_date, to_date)
+            fetch_data = await self.request_update_evnspc(
+                customer_id, from_date, to_date
+            )
 
         if fetch_data["status"] == CONF_SUCCESS:
             fetch_data.update(

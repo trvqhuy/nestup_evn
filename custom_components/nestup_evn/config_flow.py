@@ -19,8 +19,9 @@ from .const import (
     CONF_SUCCESS,
     CONF_USERNAME,
     DOMAIN,
-    VIETNAM_EVN_AREA,
 )
+
+from .types import VIETNAM_EVN_AREA
 from . import nestup_evn
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ AREA_CONFIG = vol.Schema(
 CONNECT_CONFIG = vol.Schema(
     {
         vol.Required(CONF_CUSTOMER_ID): vol.All(str, vol.Length(min=13, max=13)),
-        vol.Required(CONF_MONTHLY_START, default=25): vol.All(
+        vol.Required(CONF_MONTHLY_START, default=24): vol.All(
             int, vol.Range(min=1, max=28)
         ),
     }
@@ -49,37 +50,36 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     def __init__(self):
-        self._api = nestup_evn.EVNAPI()
         self._user_data = {}
+        self._api = None
 
     async def async_step_connect(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         errors = {}
-        if user_input is None:
-            return self.async_show_form(
-                step_id="connect", data_schema=CONNECT_CONFIG, errors=errors
-            )
+        if user_input is not None:
+            self._user_data.update(user_input)
 
-        self._user_data.update(user_input)
-
-        try:
-            res = await self.hass.async_add_executor_job(
-                self._api.request_update,
-                self._user_data[CONF_AREA],
-                self._user_data[CONF_CUSTOMER_ID],
-                self._user_data[CONF_MONTHLY_START],
-            )
-        except Exception as e:
-            _LOGGER.exception("Unexpected exception: {e}")
-            errors["base"] = CONF_ERR_UNKNOWN
-        else:
-            if res["status"] != CONF_SUCCESS:
-                errors["base"] = res["data"]
-            else:
-                return self.async_create_entry(
-                    title=self._user_data[CONF_CUSTOMER_ID], data=self._user_data
+            try:
+                res = await self._api.request_update(
+                    self._user_data[CONF_AREA],
+                    self._user_data[CONF_CUSTOMER_ID],
+                    self._user_data[CONF_MONTHLY_START],
                 )
+            except Exception as e:
+                _LOGGER.exception(f"Unexpected exception: {e}")
+                errors["base"] = CONF_ERR_UNKNOWN
+            else:
+                if res["status"] != CONF_SUCCESS:
+                    errors["base"] = res["status"]
+                else:
+                    return self.async_create_entry(
+                        title=self._user_data[CONF_CUSTOMER_ID], data=self._user_data
+                    )
+
+        return self.async_show_form(
+            step_id="connect", data_schema=CONNECT_CONFIG, errors=errors
+        )
 
     async def async_step_auth(
         self, user_input: dict[str, Any] | None = None
@@ -87,18 +87,16 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-
             self._user_data.update(user_input)
 
             try:
-                res = await self.hass.async_add_executor_job(
-                    self._api.login,
+                res = await self._api.login(
                     self._user_data[CONF_AREA],
                     self._user_data[CONF_USERNAME],
                     self._user_data[CONF_PASSWORD],
                 )
             except Exception as e:
-                _LOGGER.exception("Unexpected exception: {e}")
+                _LOGGER.exception(f"Unexpected exception: {e}")
                 errors["base"] = CONF_ERR_UNKNOWN
             else:
                 if res != CONF_SUCCESS:
@@ -115,17 +113,19 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         errors = {}
 
-        if user_input is None:
-            return self.async_show_form(
-                step_id="area", data_schema=AREA_CONFIG, errors=errors
-            )
+        self._api = nestup_evn.EVNAPI(self.hass, True)
 
-        self._user_data[CONF_AREA] = user_input[CONF_AREA]
+        if user_input is not None:
+            self._user_data[CONF_AREA] = user_input[CONF_AREA]
 
-        if user_input[CONF_AREA] == VIETNAM_EVN_AREA[0].name:
-            return await self.async_step_auth()
-        else:
-            return await self.async_step_connect()
+            if user_input[CONF_AREA] == VIETNAM_EVN_AREA[0].name:
+                return await self.async_step_auth()
+            else:
+                return await self.async_step_connect()
+
+        return self.async_show_form(
+            step_id="area", data_schema=AREA_CONFIG, errors=errors
+        )
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
