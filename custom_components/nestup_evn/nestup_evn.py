@@ -1,22 +1,25 @@
-import json
+"""Setup and manage the EVN API."""
+
+from dataclasses import asdict
 from datetime import datetime
+import json
+import logging
+import os
+import ssl
 from typing import Any
+
 from bs4 import BeautifulSoup
+
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import (
     async_create_clientsession,
     async_get_clientsession,
 )
 
-import ssl
-
-import logging
-
-_LOGGER = logging.getLogger(__name__)
-
 from .const import (
     CONF_ERR_CANNOT_CONNECT,
     CONF_ERR_INVALID_AUTH,
+    CONF_ERR_NOT_SUPPORTED,
     CONF_ERR_UNKNOWN,
     CONF_SUCCESS,
     ID_ECON_PER_DAY,
@@ -26,16 +29,17 @@ from .const import (
     ID_FROM_DATE,
     ID_LATEST_UPDATE,
     ID_TO_DATE,
-    VIETNAM_ECOST_PARAMS,
     VIETNAM_ECOST_STAGES,
     VIETNAM_ECOST_VAT,
 )
+from .types import EVN_NAME, VIETNAM_EVN_AREA, Area
 
-from .types import VIETNAM_EVN_AREA
+_LOGGER = logging.getLogger(__name__)
 
 
 class EVNAPI:
     def __init__(self, hass: HomeAssistant, is_new_session=False):
+        """Construct EVNAPI wrapper."""
 
         self._session = (
             async_create_clientsession(hass)
@@ -43,13 +47,64 @@ class EVNAPI:
             else async_get_clientsession(hass)
         )
 
-        self._area_name = ""
+        self._evn_area = {}
 
-    async def login(self, area_name, username, password) -> str:
-        """Create EVN login session corresponding with a specific area"""
-        self._area_name = [area for area in VIETNAM_EVN_AREA if area.name == area_name][
-            0
-        ]
+    async def login(self, evn_area, username, password) -> str:
+        """Try login into EVN corresponding with different EVN areas"""
+
+        self._evn_area = evn_area
+
+        if not evn_area.get("auth_needed"):
+            return CONF_SUCCESS
+
+        if (username is None) or (password is None):
+            return CONF_ERR_UNKNOWN
+
+        if evn_area.get("name") == EVN_NAME.HCMC:
+            return await self.login_evnhcmc(username, password)
+
+        return CONF_ERR_UNKNOWN
+
+    async def request_update(
+        self, evn_area: Area, customer_id, monthly_start
+    ) -> dict[str, Any]:
+        """Request new update from EVN Server, corresponding with the last session"""
+
+        self._evn_area = evn_area
+
+        fetch_data = {}
+        from_date, to_date = generate_datetime(monthly_start)
+
+        if evn_area.get("name") == EVN_NAME.HCMC:
+            fetch_data = await self.request_update_evnhcmc(
+                customer_id, from_date, to_date
+            )
+
+        elif evn_area.get("name") == EVN_NAME.SPC:
+            fetch_data = await self.request_update_evnspc(
+                customer_id, from_date, to_date
+            )
+
+        elif evn_area.get("name") == EVN_NAME.NPC:
+            fetch_data = await self.request_update_evnnpc(
+                customer_id, from_date, to_date
+            )
+
+        if fetch_data["status"] == CONF_SUCCESS:
+            fetch_data.update(
+                {
+                    ID_ECOST_PER_DAY: calc_ecost(fetch_data[ID_ECON_PER_DAY]),
+                    ID_ECOST_PER_MONTH: calc_ecost(fetch_data[ID_ECON_PER_MONTH]),
+                    ID_FROM_DATE: from_date,
+                    ID_TO_DATE: to_date,
+                    ID_LATEST_UPDATE: datetime.now().astimezone(),
+                }
+            )
+
+        return fetch_data
+
+    async def login_evnhcmc(self, username, password) -> str:
+        """Create EVN login session corresponding with EVNHCMC Endpoint"""
 
         payload = {"u": username, "p": password}
 
@@ -57,7 +112,7 @@ class EVNAPI:
         ssl_context.set_ciphers("ALL:@SECLEVEL=1")
 
         resp = await self._session.post(
-            url=self._area_name.evn_login_url, data=payload, ssl=ssl_context
+            url=self._evn_area.get("evn_login_url"), data=payload, ssl=ssl_context
         )
 
         if resp.status != 200:
@@ -85,12 +140,13 @@ class EVNAPI:
         return CONF_ERR_INVALID_AUTH
 
     async def request_update_evnhcmc(self, customer_id, start_datetime, end_datetime):
+        """Request new update from EVNHCMC Server"""
 
         ssl_context = ssl.create_default_context()
         ssl_context.set_ciphers("ALL:@SECLEVEL=1")
 
         resp = await self._session.post(
-            url=self._area_name.evn_data_request_url,
+            url=self._evn_area.get("evn_data_request_url"),
             data={
                 "input_makh": customer_id,
                 "input_tungay": start_datetime,
@@ -108,14 +164,13 @@ class EVNAPI:
         try:
             res = await resp.text()
             resp_json = json.loads(res)
+            state = resp_json["state"]
 
         except Exception as error:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
             return {"status": "error", "data": error}
-
-        state = resp_json["state"]
 
         if state != CONF_SUCCESS:
             _LOGGER.error(f"Cannot request new data from EVN Server: {resp_json}")
@@ -128,12 +183,13 @@ class EVNAPI:
         }
 
     async def request_update_evnspc(self, customer_id, start_datetime, end_datetime):
+        """Request new update from EVNSPC Server"""
 
         ssl_context = ssl.create_default_context()
         ssl_context.set_ciphers("ALL:@SECLEVEL=1")
 
         resp = await self._session.post(
-            url=self._area_name.evn_data_request_url,
+            url=self._evn_area.get("evn_data_request_url"),
             data={
                 "MaKhachHangChiSoChot": customer_id,
                 "TuNgayChiSoChot": start_datetime.replace("/", "-"),
@@ -184,7 +240,7 @@ class EVNAPI:
 
         if resp_json == {}:
             _LOGGER.error(
-                f"Cannot request new data from EVN Server: Invalid EVN Customer ID"
+                "Cannot request new data from EVN Server: Invalid EVN Customer ID"
             )
             return {"status": "error_ma_kh_deny", "data": resp_json}
 
@@ -194,44 +250,92 @@ class EVNAPI:
             ID_ECON_PER_MONTH: float(resp_json["total"]),
         }
 
-    async def request_update(
-        self, area_name, customer_id, monthly_start
-    ) -> dict[str, Any]:
-        """Request new update from EVN Server, corresponding with the last session"""
+    async def request_update_evnnpc(self, customer_id, start_datetime, end_datetime):
+        """Request new update from EVNNPC Server"""
 
-        fetch_data = {}
-        from_date, to_date = "", ""
-
-        if area_name == VIETNAM_EVN_AREA[0].name:
-            from_date, to_date = generate_datetime(monthly_start)
-            fetch_data = await self.request_update_evnhcmc(
-                customer_id, from_date, to_date
+        try:
+            resp = await self._session.get(
+                url=self._evn_area.get("evn_data_request_url"),
+                params={
+                    "MA_DDO": f"{customer_id}001",
+                    "STARTTIME": start_datetime.replace("/", "-"),
+                    "STOPTIME": end_datetime.replace("/", "-"),
+                },
             )
+            res = await resp.text()
 
-        elif area_name == VIETNAM_EVN_AREA[1].name:
-            from_date, to_date = generate_datetime(monthly_start)
-            self._area_name = [
-                area for area in VIETNAM_EVN_AREA if area.name == area_name
-            ][0]
-            fetch_data = await self.request_update_evnspc(
-                customer_id, from_date, to_date
+        except Exception as error:
+            _LOGGER.error(
+                f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
+            return {"status": "error", "data": error}
 
-        if fetch_data["status"] == CONF_SUCCESS:
-            fetch_data.update(
-                {
-                    ID_ECOST_PER_DAY: calc_ecost(fetch_data[ID_ECON_PER_DAY]),
-                    ID_ECOST_PER_MONTH: calc_ecost(fetch_data[ID_ECON_PER_MONTH]),
-                    ID_FROM_DATE: from_date,
-                    ID_TO_DATE: to_date,
-                    ID_LATEST_UPDATE: datetime.now().astimezone(),
+        if resp.status != 200:
+            _LOGGER.error(
+                f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
+            )
+            return {"status": "error", "data": res}
+
+        try:
+            resp_json = json.loads(res)
+
+        except Exception as error:
+            _LOGGER.error(
+                f"Cannot request new data from EVN Server: Invalid EVN Customer ID\n{error}"
+            )
+            return {
+                "status": "error_ma_kh_deny",
+                "data": "Cannot request e-consumption data",
+            }
+
+        return {
+            "status": CONF_SUCCESS,
+            ID_ECON_PER_DAY: float(resp_json[1]["SAN_LUONG"]),
+            ID_ECON_PER_MONTH: round(
+                float(resp_json[0]["CHI_SO_KET_THUC"])
+                - float(resp_json[-1]["CHI_SO_BAT_DAU"]),
+                2,
+            ),
+        }
+
+
+def get_evn_info(evn_customer_id: str):
+    """Get EVN infomations based on Customer ID -> EVN Company, location, branches,..."""
+
+    for index, each_area in enumerate(VIETNAM_EVN_AREA):
+        for each_pattern in each_area.pattern:
+            if each_pattern in evn_customer_id:
+
+                evn_branch = "Unknown"
+
+                file_path = os.path.join(os.path.dirname(__file__), "evn_branches.json")
+
+                with open(file_path) as f:
+                    evn_branches_list = json.load(f)
+
+                    for evn_id in evn_branches_list:
+                        if evn_id in evn_customer_id:
+                            evn_branch = evn_branches_list[evn_id]
+
+                status = CONF_SUCCESS
+
+                if not VIETNAM_EVN_AREA[index].supported:
+                    status = CONF_ERR_NOT_SUPPORTED
+
+                return {
+                    "status": status,
+                    "customer_id": evn_customer_id,
+                    "evn_area": asdict(each_area),
+                    "evn_name": each_area.name,
+                    "evn_location": each_area.location,
+                    "evn_branch": evn_branch,
                 }
-            )
 
-        return fetch_data
+    return {"status": CONF_ERR_UNKNOWN}
 
 
 def generate_datetime(monthly_start: int):
+    """Generate Datetime as string for requesting data purposes"""
     time_obj = datetime.now()
     current_day = int(time_obj.strftime("%-d"))
     monthly_start_str = "{:0>2}".format(monthly_start)
@@ -256,19 +360,24 @@ def generate_datetime(monthly_start: int):
 
 
 def calc_ecost(kwh: float) -> str:
-    price = 0.0
+    """Calculate electric cost based on e-consumption"""
 
-    for i in range(len(VIETNAM_ECOST_STAGES)):
-        if kwh > VIETNAM_ECOST_STAGES[i]:
-            if i == (len(VIETNAM_ECOST_STAGES) - 1):
-                price += (kwh - VIETNAM_ECOST_STAGES[i]) * VIETNAM_ECOST_PARAMS[i]
-            else:
-                price += (
-                    (VIETNAM_ECOST_STAGES[i + 1] - VIETNAM_ECOST_STAGES[i])
-                    if kwh > VIETNAM_ECOST_STAGES[i + 1]
-                    else (kwh - VIETNAM_ECOST_STAGES[i])
-                ) * VIETNAM_ECOST_PARAMS[i]
+    total_price = 0.0
 
-    result = int(round(price * (100 + VIETNAM_ECOST_VAT) / 100))
+    e_stage_list = list(VIETNAM_ECOST_STAGES.keys())
 
-    return str(result)
+    for index, e_stage in enumerate(e_stage_list):
+        if kwh < e_stage:
+            break
+
+        if e_stage == e_stage_list[-1]:
+            total_price += (kwh - e_stage) * VIETNAM_ECOST_STAGES[e_stage]
+        else:
+            next_stage = e_stage_list[index + 1]
+            total_price += (
+                (next_stage - e_stage) if kwh > next_stage else (kwh - e_stage)
+            ) * VIETNAM_ECOST_STAGES[e_stage]
+
+    total_price = int(round((total_price / 100) * (100 + VIETNAM_ECOST_VAT)))
+
+    return str(total_price)

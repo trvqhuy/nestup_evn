@@ -1,10 +1,13 @@
+"""Setup and manage HomeAssistant Entities."""
+
+import logging
 from typing import Any
+
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-
 from homeassistant.helpers.update_coordinator import (
     CoordinatorEntity,
     DataUpdateCoordinator,
@@ -12,8 +15,6 @@ from homeassistant.helpers.update_coordinator import (
 
 from . import nestup_evn
 from .const import (
-    CONF_USERNAME,
-    CONF_PASSWORD,
     CONF_AREA,
     CONF_CUSTOMER_ID,
     CONF_DEVICE_MANUFACTURER,
@@ -21,14 +22,13 @@ from .const import (
     CONF_DEVICE_NAME,
     CONF_DEVICE_SW_VERSION,
     CONF_MONTHLY_START,
+    CONF_PASSWORD,
     CONF_SUCCESS,
+    CONF_USERNAME,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
-
-from .types import EVN_SENSORS, VIETNAM_EVN_AREA, EVNSensorEntityDescription
-
-import logging
+from .types import EVN_SENSORS, EVNSensorEntityDescription
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ async def async_setup_entry(
 
     entry_config = hass.data[DOMAIN][entry.entry_id]
 
-    evn_api = nestup_evn.EVNAPI(hass)
+    evn_api = nestup_evn.EVNAPI(hass, True)
     evn_device = EVNDevice(entry_config, evn_api)
 
     await evn_device.async_create_coordinator(hass)
@@ -48,20 +48,24 @@ async def async_setup_entry(
     entities = []
     entities.extend([EVNSensor(evn_device, description) for description in EVN_SENSORS])
 
-    async_add_entities(entities, True)
+    async_add_entities(entities)
 
 
 class EVNDevice:
     """EVN Device Instance"""
 
     def __init__(self, dataset, api: nestup_evn.EVNAPI) -> None:
-        """Construct a device wrapper."""
+        """Construct Device wrapper."""
 
         self._name = f"{CONF_DEVICE_NAME}: {dataset[CONF_CUSTOMER_ID]}"
         self._coordinator: DataUpdateCoordinator | None = None
 
-        self._username = dataset[CONF_USERNAME] or None
-        self._password = dataset[CONF_PASSWORD] or None
+        if CONF_USERNAME in dataset:
+            self._username = dataset[CONF_USERNAME]
+            self._password = dataset[CONF_PASSWORD]
+        else:
+            self._username = None
+            self._password = None
 
         self._area_name = dataset[CONF_AREA]
         self._customer_id = dataset[CONF_CUSTOMER_ID]
@@ -71,7 +75,9 @@ class EVNDevice:
         self._data = {}
 
     async def update(self) -> dict[str, Any]:
-        if self._area_name == VIETNAM_EVN_AREA[0].name:
+        """Update device data from EVN Endpoints."""
+
+        if self._area_name.get("auth_needed"):
             login_state = await self._api.login(
                 self._area_name, self._username, self._password
             )
@@ -79,8 +85,8 @@ class EVNDevice:
             if login_state != CONF_SUCCESS:
                 return
 
-        _LOGGER.debug(
-            "[EVN Monitor] Updating data for EVN Customer ID %s", self._customer_id
+        _LOGGER.info(
+            "[EVN Monitor] Updating data for EVN Customer ID: %s", self._customer_id
         )
 
         self._data = await self._api.request_update(
@@ -90,11 +96,11 @@ class EVNDevice:
         return self._data
 
     async def _async_update(self):
-        """Pull the latest data from EVN."""
+        """Fetch the latest data from EVN."""
         await self.update()
 
     async def async_create_coordinator(self, hass: HomeAssistant) -> None:
-        """Get the coordinator for a specific device."""
+        """Create the coordinator for this specific device."""
         if self._coordinator:
             return
 
@@ -105,12 +111,12 @@ class EVNDevice:
             update_method=self._async_update,
             update_interval=DEFAULT_SCAN_INTERVAL,
         )
-        await coordinator.async_refresh()
+        await coordinator.async_config_entry_first_refresh()
         self._coordinator = coordinator
 
     @property
     def info(self) -> DeviceInfo:
-        """Return a device description for device registry."""
+        """Return device description for device registry."""
         return DeviceInfo(
             name=self._name,
             identifiers={(DOMAIN, self._customer_id)},
@@ -126,9 +132,10 @@ class EVNDevice:
 
 
 class EVNSensor(CoordinatorEntity, SensorEntity):
-    """EVN Sensor Instance"""
+    """EVN Sensor Instance."""
 
     def __init__(self, device: EVNDevice, description: EVNSensorEntityDescription):
+        """Construct EVN sensor wrapper."""
         super().__init__(device.coordinator)
 
         self._device = device
@@ -147,5 +154,7 @@ class EVNSensor(CoordinatorEntity, SensorEntity):
         """Return a device description for device registry."""
         return self._device.info
 
+    @property
     def available(self) -> bool:
+        """Return the availability of the sensor."""
         return self._device._data["status"] == CONF_SUCCESS

@@ -7,9 +7,9 @@
   "dependencies": [],
   "codeowners": ["@trvqhuy"],
   "requirements": [
-     "beautifulsoup4",
-     "voluptuous"
+     "beautifulsoup4==4.11.1",
+     "voluptuous==0.13.1"
   ],
   "iot_class": "cloud_polling",
-  "version": "1.1.8"
+  "version": "1.1.9"
 }

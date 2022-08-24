@@ -1,4 +1,5 @@
-from __future__ import annotations
+from array import ArrayType
+from dataclasses import dataclass
 from typing import Any, Callable
 
 from homeassistant.components.sensor import (
@@ -7,8 +8,16 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import ENERGY_KILO_WATT_HOUR
-from .const import *
-from dataclasses import dataclass
+
+from .const import (
+    ID_ECON_PER_DAY,
+    ID_ECON_PER_MONTH,
+    ID_ECOST_PER_DAY,
+    ID_ECOST_PER_MONTH,
+    ID_FROM_DATE,
+    ID_LATEST_UPDATE,
+    ID_TO_DATE,
+)
 
 
 @dataclass
@@ -28,22 +37,23 @@ class Area:
     """Describe the supported areas."""
 
     name: str
+    location: str
     evn_login_url: str
     evn_data_request_url: str
+    supported: bool
+    auth_needed: bool
+    pattern: ArrayType
 
 
-VIETNAM_EVN_AREA = [
-    Area(
-        "EVNHCMC - Ho Chi Minh City",
-        "https://cskh.evnhcmc.vn/Dangnhap/checkLG",
-        "https://cskh.evnhcmc.vn/Tracuu/ajax_dienNangTieuThuTheoNgay",
-    ),
-    Area(
-        "EVNSPC - Southern Vietnam",
-        "(EVNSPC does not need this field)",
-        "https://www.cskh.evnspc.vn/TraCuu/TraCuuSanLuongDienTieuThuTrongNgay",
-    ),
-]
+@dataclass
+class EVN_NAME:
+    """Describe the EVN names."""
+
+    HANOI = "EVNHANOI"
+    HCMC = "EVNHCMC"
+    NPC = "EVNNPC"
+    CPC = "EVNCPC"
+    SPC = "EVNSPC"
 
 
 @dataclass
@@ -58,10 +68,58 @@ class EVNSensorEntityDescription(SensorEntityDescription, EVNRequiredKeysMixin):
     """Describes EVN sensor entity."""
 
 
+VIETNAM_EVN_AREA = [
+    Area(
+        EVN_NAME.HCMC,
+        "Ho Chi Minh City",
+        "https://cskh.evnhcmc.vn/Dangnhap/checkLG",
+        "https://cskh.evnhcmc.vn/Tracuu/ajax_dienNangTieuThuTheoNgay",
+        True,
+        True,
+        ["PE"],
+    ),
+    Area(
+        EVN_NAME.HANOI,
+        "Hanoi Capital",
+        "NOT_YET_SUPPORTED",
+        "NOT_YET_SUPPORTED",
+        False,
+        True,
+        ["PD"],
+    ),
+    Area(
+        EVN_NAME.NPC,
+        "Nouthern Vietnam",
+        "(EVNNPC does not need this field)",
+        "https://meterindex.enterhub.asia/SLngay",
+        True,
+        False,
+        ["PA", "PH", "PM", "PN"],
+    ),
+    Area(
+        EVN_NAME.SPC,
+        "Southern Vietnam",
+        "(EVNSPC does not need this field)",
+        "https://www.cskh.evnspc.vn/TraCuu/TraCuuSanLuongDienTieuThuTrongNgay",
+        True,
+        False,
+        ["PB", "PK"],
+    ),
+    Area(
+        EVN_NAME.CPC,
+        "Central Vietnam",
+        "NOT_YET_SUPPORTED",
+        "NOT_YET_SUPPORTED",
+        True,
+        True,
+        ["PQ", "PC", "PP"],
+    ),
+]
+
 EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     EVNSensorEntityDescription(
         key=ID_ECON_PER_DAY,
-        name="Daily E-consump.",
+        name="Last Date E-consump.",
         icon="mdi:flash-outline",
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
@@ -70,7 +128,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     ),
     EVNSensorEntityDescription(
         key=ID_ECON_PER_MONTH,
-        name="Monthly E-consump.",
+        name="Last Month E-consump.",
         icon="mdi:flash-outline",
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
@@ -79,7 +137,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     ),
     EVNSensorEntityDescription(
         key=ID_ECOST_PER_DAY,
-        name="Daily E-cost",
+        name="Last Date E-cost",
         icon="mdi:cash-multiple",
         native_unit_of_measurement="VNĐ",
         state_class=SensorStateClass.MEASUREMENT,
@@ -87,7 +145,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     ),
     EVNSensorEntityDescription(
         key=ID_ECOST_PER_MONTH,
-        name="Monthly E-cost",
+        name="Last Month E-cost",
         icon="mdi:cash-multiple",
         native_unit_of_measurement="VNĐ",
         state_class=SensorStateClass.MEASUREMENT,
@@ -102,7 +160,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     ),
     EVNSensorEntityDescription(
         key=ID_FROM_DATE,
-        name="Date Start",
+        name="Last Month",
         icon="mdi:calendar-clock",
         value_fn=lambda data: data[ID_FROM_DATE],
     ),

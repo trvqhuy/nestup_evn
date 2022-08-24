@@ -1,36 +1,34 @@
 {
     "config": {
         "abort": {
-            "already_configured": "Device is already configured"
+            "already_configured": "A device with your Customer ID has already been configured.",
+            "not_supported": "Based on your Customer ID: **{customer_id}**\nAutomatically detect your EVN location:\n- EVN Company: **{evn_name}**\n- EVN Location: **{evn_location}**\n- EVN Branch: **{evn_branch}**\n\nUnfortunately, your EVN location has not been supported yet.\nPlease contact **github@trvqhuy**, together we could make it happen."
         },
         "error": {
             "cannot_connect": "Failed to connect to EVN Server.",
-            "invalid_auth": "Invalid authentication. Please check your EVN credentials.",
-            "unknown": "Unexpected error. Please contact github@tvqhuy.",
-            "error_ma_kh_deny": "Invalid EVN Customer ID."
+            "invalid_auth": "Invalid EVN authentication. Please recheck your Username and Password.",
+            "unknown": "Unexpected error. Please contact github@trvqhuy.",
+            "not_supported": "Your EVN Branch has not been supported yet. Please contact github@trvqhuy.",
+            "error_ma_kh_deny": "Invalid EVN Customer ID. Please recheck your Customer ID"
         },
         "step": {
-            "connect": {
+            "customer_id": {
                 "data": {
-                    "customer_id": "Customer ID",
-                    "monthly_start": "Monthly Start"
+                    "customer_id": "Your Customer ID"
                 },
-                "description": "Fulfill your EVN Credentials to Finish"
+                "description": "Please fulfill your EVN Customer ID to continue.\n\nRequirements of a proper EVN ID:\n1. Starts with letter **P**.\n2. Consists of **13** characters.\n\nExample: `PE06000012345`"
             },
-            "auth": {
+            "evn_info": {
+                "description": "Based on your Customer ID: **{customer_id}**\nAutomatically detect your EVN location:\n- EVN Company: **{evn_name}**\n- EVN Location: **{evn_location}**\n- EVN Branch: **{evn_branch}**\n\nAre the above informations true?"
+            },
+            "fulfill_data": {
                 "data": {
                     "password": "Password",
-                    "username": "Username"
+                    "username": "Username",
+                    "customer_id": "Customer ID",
+                    "monthly_start": "Date Start"
                 },
-                "description": "Connect to your EVN Account"
-            },
-            "area": {
-                "data": {
-                    "Ho Chi Minh City": "HCMC",
-                    "Southern Vietnam": "South"
-                },
-                "description": "Please choose your EVN area from the list below",
-                "title": "EVN Area"
+                "description": "Fulfill your EVN informations for the following ID:\n\n- Customer ID: **{customer_id}**\n- EVN Branch: **{evn_name}**\n\n`Note: Date Start is the date your monthly electric bill starts`"
             }
         }
     }
