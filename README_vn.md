@@ -6,7 +6,7 @@
 
 #### [English](https://github.com/trvqhuy/ha-evn/blob/main/README.md) | Tiếng Việt
 
-Từ việc sử dụng các phương thức có sẵn từ module **AIOHTTP** thông qua giao thức **HTTP(S)** cơ bản, công cụ có thể theo dõi dữ liệu điện năng tiêu thụ từ [EVN](https://www.evn.com.vn) trực tiếp trong [Home Assistant](https://www.home-assistant.io), hiện tại đã hỗ trợ cho một số vùng miền cùng với chi nhánh EVN tương ứng tại Việt Nam (xem tại [danh sách phía dưới]()).
+Từ việc sử dụng các phương thức có sẵn từ module **AIOHTTP** thông qua giao thức **HTTP(S)** cơ bản, công cụ có thể theo dõi dữ liệu điện năng tiêu thụ từ [EVN](https://www.evn.com.vn) trực tiếp trong [Home Assistant](https://www.home-assistant.io), hiện tại đã hỗ trợ cho một số vùng miền cùng với chi nhánh EVN tương ứng tại Việt Nam (xem tại [danh sách phía dưới](https://github.com/trvqhuy/nestup_evn/edit/main/README_vn.md#l%C6%B0u-%C3%BD-tr%C6%B0%E1%BB%9Bc-khi-c%C3%A0i-%C4%91%E1%BA%B7t)).
 
 Công cụ hỗ trợ cài đặt và chỉnh sửa trực tiếp thông qua UI, dễ dàng quản lí các thông số điện tiêu thụ qua các thiết bị theo dõi tập trung.
 
