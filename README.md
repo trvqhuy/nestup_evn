@@ -91,13 +91,13 @@ Starting from the v1.1.9 version, the component has successfully provided suppor
     - Consists of exactly **13** characters.
     - Starts with **'P'** letter.
     
-    ![setup_02](screenshots/setup_02.png) ![setup_03](screenshots/setup_03.png)
+    ![setup_02](screenshots/setup_02.png) 
     
 3. Fulfill your `EVN Credentials` (Username & Password).
 4. Choose your `Billing Start Date`.
     **Note**: this is the montly billing date of your electric bill from EVN. 
     
-    ![setup_04](screenshots/setup_04.png)
+    ![setup_03](screenshots/setup_03.png)
     
 5. Congrats, everything has been done, you can use the component now.
 
@@ -106,12 +106,12 @@ Starting from the v1.1.9 version, the component has successfully provided suppor
 
 > However, the configuration seems not neccessary to adjust, fixed configurations are listed below.
 
-1. EVN RETAIL ELECTRICITY TARIFF:
+1. EVN Retail Electricity Tariff:
 
     The reference would always be `Household Customer Group` although this variable may varies due to usage purpose.
     > Visit this [link](https://www.evn.com.vn/c3/evn-va-khach-hang/Bieu-gia-ban-le-dien-9-79.aspx) for more informations about electricity price.
     
-2. DEFAULT POLLING INTERVAL:
+2. Default Polling Interval:
 
     ` 30 minutes ` is the default interval for fetching new data from EVN, which is reasonable break, otherwise it would take up resources and overwhelm the server.
 
