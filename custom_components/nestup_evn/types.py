@@ -71,7 +71,7 @@ class EVNSensorEntityDescription(SensorEntityDescription, EVNRequiredKeysMixin):
 VIETNAM_EVN_AREA = [
     Area(
         EVN_NAME.HCMC,
-        "Ho Chi Minh City",
+        "Thành phố Hồ Chí Minh",
         "https://cskh.evnhcmc.vn/Dangnhap/checkLG",
         "https://cskh.evnhcmc.vn/Tracuu/ajax_dienNangTieuThuTheoNgay",
         True,
@@ -80,7 +80,7 @@ VIETNAM_EVN_AREA = [
     ),
     Area(
         EVN_NAME.HANOI,
-        "Hanoi Capital",
+        "Thủ đô Hà Nội",
         "NOT_YET_SUPPORTED",
         "NOT_YET_SUPPORTED",
         False,
@@ -89,7 +89,7 @@ VIETNAM_EVN_AREA = [
     ),
     Area(
         EVN_NAME.NPC,
-        "Nouthern Vietnam",
+        "Khu vực miền Bắc",
         "(EVNNPC does not need this field)",
         "https://meterindex.enterhub.asia/SLngay",
         True,
@@ -98,7 +98,7 @@ VIETNAM_EVN_AREA = [
     ),
     Area(
         EVN_NAME.SPC,
-        "Southern Vietnam",
+        "Khu vực miền Nam",
         "(EVNSPC does not need this field)",
         "https://www.cskh.evnspc.vn/TraCuu/TraCuuSanLuongDienTieuThuTrongNgay",
         True,
@@ -107,7 +107,7 @@ VIETNAM_EVN_AREA = [
     ),
     Area(
         EVN_NAME.CPC,
-        "Central Vietnam",
+        "Khu vực miền Trung",
         "NOT_YET_SUPPORTED",
         "NOT_YET_SUPPORTED",
         True,
@@ -119,7 +119,7 @@ VIETNAM_EVN_AREA = [
 EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     EVNSensorEntityDescription(
         key=ID_ECON_PER_DAY,
-        name="Last Date E-consump.",
+        name="Chỉ số ngày (mới nhất)",
         icon="mdi:flash-outline",
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
@@ -128,7 +128,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     ),
     EVNSensorEntityDescription(
         key=ID_ECON_PER_MONTH,
-        name="Last Month E-consump.",
+        name="Chỉ số tháng (tạm tính)",
         icon="mdi:flash-outline",
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
@@ -137,7 +137,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     ),
     EVNSensorEntityDescription(
         key=ID_ECOST_PER_DAY,
-        name="Last Date E-cost",
+        name="Tiền điện ngày (mới nhất)",
         icon="mdi:cash-multiple",
         native_unit_of_measurement="VNĐ",
         state_class=SensorStateClass.MEASUREMENT,
@@ -145,7 +145,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     ),
     EVNSensorEntityDescription(
         key=ID_ECOST_PER_MONTH,
-        name="Last Month E-cost",
+        name="Tiền điện tháng (tạm tính)",
         icon="mdi:cash-multiple",
         native_unit_of_measurement="VNĐ",
         state_class=SensorStateClass.MEASUREMENT,
@@ -153,20 +153,20 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     ),
     EVNSensorEntityDescription(
         key=ID_LATEST_UPDATE,
-        name="Latest Update",
+        name="Lần cập nhật cuối",
         icon="mdi:calendar-check",
         device_class=SensorDeviceClass.TIMESTAMP,
         value_fn=lambda data: data[ID_LATEST_UPDATE],
     ),
     EVNSensorEntityDescription(
         key=ID_FROM_DATE,
-        name="Last Month",
+        name="Ngày bắt đầu hóa đơn tháng",
         icon="mdi:calendar-clock",
         value_fn=lambda data: data[ID_FROM_DATE],
     ),
     EVNSensorEntityDescription(
         key=ID_TO_DATE,
-        name="Last Date",
+        name="Ngày mới nhất",
         icon="mdi:calendar-clock",
         value_fn=lambda data: data[ID_TO_DATE],
     ),
