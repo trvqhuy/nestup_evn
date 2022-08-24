@@ -26,7 +26,7 @@
                     "password": "Password",
                     "username": "Username",
                     "customer_id": "Customer ID",
-                    "monthly_start": "Date Start"
+                    "monthly_start": "Billing Start Date"
                 },
                 "description": "Fulfill your EVN informations for the following ID:\n\n- Customer ID: **{customer_id}**\n- EVN Branch: **{evn_name}**\n\n`Note: Date Start is the date your monthly electric bill starts`"
             }
