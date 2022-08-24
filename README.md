@@ -4,7 +4,7 @@
 
 # Vietnam EVN Data Fetcher for HA
 
-English | [Tiếng Việt](https://github.com/trvqhuy/ha-evn/blob/main/README_vn.md)
+#### English | [Tiếng Việt](https://github.com/trvqhuy/ha-evn/blob/main/README_vn.md)
 
 This component utilized the simple yet powerful **HTTP(S)** protocol to periodically fetch the latest e-consumption data from [EVN Endpoint](https://www.evn.com.vn) into [Home Assistant](https://www.home-assistant.io) with **AIOHTTP** module (and a brilliant assist from **BeautifulSoup** for scaping useful data). 
 
