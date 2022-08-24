@@ -74,33 +74,33 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
 1. Tìm công cụ `EVN Data Fetcher` trong những công cụ đã tải về.
     > Settings > Devices and Services > Integrations > Add Integrations > Tìm `EVN Data Fetcher`
     
-    ![setup_01](screenshots/setup_01.png)
+    ![setup_01](screenshots/setup_01_vn.png)
     
-2. Điền mã khách hàng vào `EVN Customer ID`.
+2. Điền `Mã khách hàng`.
 
     **Yêu cầu**: Mã khách hàng của bạn phải thỏa những điều kiện sau:
 
     - Chứa chính xác **13** kí tự.
     - Bắt đầu bằng chữ **'P'**.
     
-    ![setup_02](screenshots/setup_02.png) ![setup_03](screenshots/setup_03.png)
+    ![setup_02](screenshots/setup_02_vn.png) 
     
-3. (Nếu cần) Điền tài khoản EVN vào `EVN Credentials` (Username và Password).
-4. Chọn `Billing Start Date`.
+3. (Nếu có) Điền `Tài khoản EVN`
+4. Chọn `Ngày bắt đầu hóa đơn`.
     **Chú ý**: đây là ngày bắt đầu tính hóa đơn điện của mỗi tháng. 
     
-    ![setup_04](screenshots/setup_04.png)
+    ![setup_03](screenshots/setup_03_vn.png)
     
 5. Hoàn thành, bây giờ bạn có thể thấy thiết bị theo dõi của mình ở phần Devices.
     
-    ![device_info](screenshots/device_info.png)
+    ![device_info](screenshots/device_info_vn.png)
 
 ### Chỉnh sửa thông số
 > Hiện tại, sau khi đã thiết lập, các thông số của công cụ chưa thể chỉnh sửa, có thể tính năng này sẽ được cập nhật trong tương lai, hoặc có thể không.
 
 > Tuy nhiên, những thông số này "có vẻ như" sẽ không cần phải chỉnh sửa, hiện tại đã được gán mặc định như bên dưới.
 
-1. GIÁ BÁN LẺ ĐIỆN CỦA EVN:
+1. Giá bán lẻ điện EVN:
 
     Mặc dù có nhiều loại biểu giá tùy vào mục đích sử dụng điện, nhưng dự án này sẽ mặc định tính giá tiền điện theo biểu giá bán lẻ của nhóm đối tượng `Sinh Hoạt`.
     > Truy cập [link](https://www.evn.com.vn/c3/evn-va-khach-hang/Bieu-gia-ban-le-dien-9-79.aspx) này để xem biểu giá bán lẻ tiền điện của EVN.
