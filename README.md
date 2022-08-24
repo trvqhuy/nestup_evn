@@ -1,7 +1,7 @@
 [![hacs][hacs-badge]][hacs]
-[![Code Style][black-badge]][black]
 [![Project Maintenance][maintenance-badge]][maintenance]
-[![License][license-badge]][license]
+
+[![Code Style][black-badge]][black]
 
 # Vietnam EVN Data Fetcher for HA
 
@@ -124,9 +124,9 @@ Starting from the v1.1.9 version, the component has successfully provided suppor
 
 [hacs]: https://github.com/custom-components/hacs
 [hacs-badge]: https://img.shields.io/badge/HACS-default-0468BF.svg?style=for-the-badge
-[black-badge]: https://img.shields.io/badge/code%20style-black%20&%20flake8-0D8BD9.svg?style=for-the-badge
+[black-badge]: https://img.shields.io/badge/code%20style-black%20&%20flake8-262626.svg?style=for-the-badge
 [black]: https://github.com/ambv/black
-[maintenance-badge]: https://img.shields.io/badge/MAINTAINER-%40TRVQHUY-F2B84B?style=for-the-badge
+[maintenance-badge]: https://img.shields.io/badge/MAINTAINER-%40TRVQHUY-F2994B?style=for-the-badge
 [maintenance]: https://github.com/trvqhuy
 [license-badge]: https://img.shields.io/badge/license-apache2.0-F2994B.svg?style=for-the-badge
 [license]: https://github.com/trvqhuy/nestup_evn/blob/main/custom_components/nestup_evn/LICENSE
