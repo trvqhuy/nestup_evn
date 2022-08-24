@@ -16,10 +16,10 @@
                 "data": {
                     "customer_id": "Mã khách hàng"
                 },
-                "description": "Xin hãy nhập mã khách hàng EVN của bạn.\n\nĐiều kiện của mã ID EVN:\n1. Bắt đầu bằng chữ **P**.\n2. Bao gồm **13** kí tự.\n\nVí dụ: `PE06000012345`"
+                "description": "Xin hãy nhập mã khách hàng EVN của bạn.\n\nĐiều kiện của mã ID EVN:\n1. Bắt đầu bằng chữ **P**.\n2. Bao gồm **13** kí tự.\n\nVí dụ mẫu: `PE06000012345`"
             },
             "evn_info": {
-                "description": "Dựa vào mã khách hàng EVN: **{customer_id}**\nTự động xác định server EVN:\n- Công ty thành viên: **{evn_name}**\n- Địa điểm: **{evn_location}**\n- Chi nhánh EVN: **{evn_branch}**\n\Xác nhận thông tin trên là đúng?"
+                "description": "Dựa vào mã khách hàng EVN: **{customer_id}**\nTự động xác định server EVN:\n- Công ty thành viên: **{evn_name}**\n- Địa điểm: **{evn_location}**\n- Chi nhánh EVN: **{evn_branch}**\n\nXác nhận thông tin trên là đúng?"
             },
             "fulfill_data": {
                 "data": {
