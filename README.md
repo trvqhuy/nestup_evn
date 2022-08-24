@@ -13,7 +13,7 @@ Hence, it supports installation through UI, and can easily integrate monitoring 
 ![ui_display](screenshots/ui_display.png)
 
 ## Before Installation
-There are some EVN branches that require authentication to fetch the daily electric consumption data, but orthers do not need this field.
+There are some EVN branches that require authentication to fetch the daily electric consumption data, but others do not need this field.
 
 A qualified EVN account will consist of:
 
