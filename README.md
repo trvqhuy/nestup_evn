@@ -30,7 +30,7 @@ Starting from the v1.1.9 version, the component has successfully provided suppor
 | EVNHCMC | Ho Chi Minh City | ☑️ | ☑️ | [Link](https://cskh.evnhcmc.vn/lienhe)
 | EVNSPC | Southern Vietnam | ☑️ |   | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
 | EVNNPC | Northern Vietnam | ☑️ |   | [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
-| EVNHANOI | Ha Noi Capital | (not yet) | ? | [Link](https://evnhanoi.vn/infomation/lien-he)
+| EVNHANOI | Ha Noi Capital | ☑️ | ☑️ | [Link](https://evnhanoi.vn/infomation/lien-he)
 | EVNCPC | Central Vietnam | (not yet) | ? | [Link](https://cskh.cpc.vn/lien-he)
 
 > If your area were not yet supported, feel free to [contact me][maintenance], we could make it happen. 
