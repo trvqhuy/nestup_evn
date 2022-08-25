@@ -9,7 +9,8 @@
             "invalid_auth": "Tài khoản EVN không hợp lệ. Xin kiểm tra lại Username và Password của bạn.",
             "unknown": "Lỗi không xác định. Xin hãy report tới github@trvqhuy.",
             "not_supported": "Khu vực của bạn chưa được hỗ trợ. Xin hãy liên hệ github@trvqhuy.",
-            "error_ma_kh_deny": "Mã khách hàng không hợp lệ. Xin hãy kiểm tra và thử lại."
+            "error_ma_kh_deny": "Mã khách hàng không hợp lệ. Xin hãy kiểm tra và thử lại.",
+            "no_monitor": "Dong ho cua ban khong ho tro do xa. Vui long nhap ma khach hang khac."
         },
         "step": {
             "customer_id": {

@@ -81,9 +81,9 @@ VIETNAM_EVN_AREA = [
     Area(
         EVN_NAME.HANOI,
         "Thủ đô Hà Nội",
-        "NOT_YET_SUPPORTED",
-        "NOT_YET_SUPPORTED",
-        False,
+        "https://apicskh.evnhanoi.com.vn/connect/token",
+        "https://evnhanoi.vn/api/TraCuu/LayChiSoDoXa",
+        True,
         True,
         ["PD"],
     ),

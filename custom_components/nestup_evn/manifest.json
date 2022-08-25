@@ -11,5 +11,5 @@
      "voluptuous==0.13.1"
   ],
   "iot_class": "cloud_polling",
-  "version": "1.1.9"
+  "version": "1.2.2"
 }

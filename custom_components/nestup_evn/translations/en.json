@@ -9,7 +9,8 @@
             "invalid_auth": "Invalid EVN authentication. Please recheck your Username and Password.",
             "unknown": "Unexpected error. Please contact github@trvqhuy.",
             "not_supported": "Your EVN Branch has not been supported yet. Please contact github@trvqhuy.",
-            "error_ma_kh_deny": "Invalid EVN Customer ID. Please recheck your Customer ID"
+            "error_ma_kh_deny": "Invalid EVN Customer ID. Please recheck your Customer ID",
+            "no_monitor": "Your monitor is not supported yet. Please choose another Customer ID"
         },
         "step": {
             "customer_id": {
