@@ -22,7 +22,7 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
 | EVNHCMC | Thành phố Hồ Chí Minh | ☑️ | ☑️ | [Link](https://cskh.evnhcmc.vn/lienhe)
 | EVNSPC | Các tỉnh miền Nam | ☑️ |   | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
 | EVNNPC | Các tỉnh miền Bắc | ☑️ |   | [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
-| EVNHANOI | Thành phố Hà Nội | (chưa hỗ trợ) | ? | [Link](https://evnhanoi.vn/infomation/lien-he)
+| EVNHANOI | Thành phố Hà Nội | ☑️ | ☑️ | [Link](https://evnhanoi.vn/infomation/lien-he)
 | EVNCPC | Các tỉnh miền Trung | (chưa hỗ trợ) | ? | [Link](https://cskh.cpc.vn/lien-he)
 
 > Nếu khu vực của bạn chưa được hỗ trợ, hãy liên hệ [maintainer][maintenance] của repo này. 
