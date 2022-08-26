@@ -13,6 +13,8 @@ Hence, it supports installation through UI, and can easily integrate monitoring 
 ![ui_display](screenshots/ui_display.png)
 
 ## Before Installation
+#### **Warning**: The project needs minimum version of HA: 2022.7.0
+
 There are some EVN branches that require authentication to fetch the daily electric consumption data, but others do not need this field.
 
 A qualified EVN account will consist of:
@@ -23,7 +25,7 @@ A qualified EVN account will consist of:
 
 **Note**: Check the table below, if your area needed EVN Account to setup the component, please contact the corresponding support center link to get the required credentials.
 
-Starting from the v1.1.9 version, the component has successfully provided support for the areas listed below:
+Starting from the v1.2.5 version, the component has successfully provided support for all of the areas in Vietnam.
 
 | EVN Branch | Vietnam Area | Is Supported  | Is EVN Account Required | Support Center |
 |:---:|:---:|:---:|:---:|:---:|
@@ -31,9 +33,7 @@ Starting from the v1.1.9 version, the component has successfully provided suppor
 | EVNSPC | Southern Vietnam | ☑️ |   | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
 | EVNNPC | Northern Vietnam | ☑️ |   | [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
 | EVNHANOI | Ha Noi Capital | ☑️ | ☑️ | [Link](https://evnhanoi.vn/infomation/lien-he)
-| EVNCPC | Central Vietnam | (not yet) | ? | [Link](https://cskh.cpc.vn/lien-he)
-
-> If your area were not yet supported, feel free to [contact me][maintenance], we could make it happen. 
+| EVNCPC | Central Vietnam | ☑️ | ☑️ | [Link](https://cskh.cpc.vn/lien-he)
     
 ## Installation
 #### **Note:** Choose 1 from the below methods for setting up the integration.
@@ -113,11 +113,15 @@ Starting from the v1.1.9 version, the component has successfully provided suppor
     
 2. Default Polling Interval:
 
-    ` 30 minutes ` is the default interval for fetching new data from EVN, which is reasonable break, otherwise it would take up resources and overwhelm the server.
+    ` 60 minutes ` is the default interval for fetching new data from EVN, which is reasonable break, otherwise it would take up resources and overwhelm the server.
 
 ## Thank and Support
 
-> If your EVN Area were **not supported** by this integration, contact [me](https://github.com/trvqhuy) and together we could make it happen for the community.
+### Special thanks to:
+- **Mr. Pham Dinh Hai** and **Mr. Huynh Nhat** for believing and providing the author his EVN Credentials, thus the project could be available for those living in Hanoi Capital and Central Vietnam.
+- **Mr. Nguyen Huu Thanh** for giving a huge support to the author.
+
+> Without those guys, the `nestup_evn` repo would not be here, being an open-source integration to the community.
 
 > Last word, the maintainer wants to thank himself for making this project happen.
 
