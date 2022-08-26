@@ -2,7 +2,6 @@
 
 from dataclasses import asdict
 from datetime import datetime
-from email import header
 import json
 import logging
 import os
@@ -69,6 +68,9 @@ class EVNAPI:
         elif evn_area.get("name") == EVN_NAME.HANOI:
             return await self.login_evnhanoi(username, password)
 
+        elif evn_area.get("name") == EVN_NAME.CPC:
+            return await self.login_evncpc(username, password)
+
         return CONF_ERR_UNKNOWN
 
     async def request_update(
@@ -104,6 +106,11 @@ class EVNAPI:
                 customer_id, from_date, to_date
             )
 
+        elif evn_area.get("name") == EVN_NAME.CPC:
+            fetch_data = await self.request_update_evncpc(
+                customer_id, from_date, to_date
+            )
+
         if fetch_data["status"] == CONF_SUCCESS:
             fetch_data.update(
                 {
@@ -117,26 +124,26 @@ class EVNAPI:
 
         return fetch_data
 
-    async def login_evnhanoi(self, username, password) -> str:
-        """Create EVN login session corresponding with EVNHANOI Endpoint"""
+    async def login_evncpc(self, username, password) -> str:
+        """Create EVN login session corresponding with EVNCPC Endpoint"""
 
         payload = {
-            "username": username, 
-            "password": password, 
-            "client_id": "httplocalhost4500", 
-            "client_secret": "secret", 
+            "username": username,
+            "password": password,
+            "scope": "CSKH",
             "grant_type": "password",
-
         }
 
+        headers = {"Authorization": "Basic Q1NLSF9Td2FnZ2VyOjFxMnczZSo="}
+
         resp = await self._session.post(
-            url=self._evn_area.get("evn_login_url"), data=payload
+            url=self._evn_area.get("evn_login_url"), data=payload, headers=headers
         )
 
         if resp.status != 200:
             if resp.status == 400:
                 _LOGGER.error(
-                    f"Cannot login into EVN Server: Invalid EVN Authentication"
+                    "Cannot login into EVN Server: Invalid EVN Authentication"
                 )
                 return CONF_ERR_INVALID_AUTH
 
@@ -157,7 +164,54 @@ class EVNAPI:
 
         if ("error" in resp_json) and (resp_json["error"] == "invalid_grant"):
             return CONF_ERR_INVALID_AUTH
-        
+
+        elif "access_token" in resp_json:
+            self._evn_area["access_token"] = resp_json["access_token"]
+            return CONF_SUCCESS
+
+        _LOGGER.error(f"Error while logging in EVN Endpoints: {resp_json}")
+        return CONF_ERR_UNKNOWN
+
+    async def login_evnhanoi(self, username, password) -> str:
+        """Create EVN login session corresponding with EVNHANOI Endpoint"""
+
+        payload = {
+            "username": username,
+            "password": password,
+            "client_id": "httplocalhost4500",
+            "client_secret": "secret",
+            "grant_type": "password",
+        }
+
+        resp = await self._session.post(
+            url=self._evn_area.get("evn_login_url"), data=payload
+        )
+
+        if resp.status != 200:
+            if resp.status == 400:
+                _LOGGER.error(
+                    "Cannot login into EVN Server: Invalid EVN Authentication"
+                )
+                return CONF_ERR_INVALID_AUTH
+
+            _LOGGER.error(
+                f"Cannot connect to EVN Server while loging in: status code {resp.status}"
+            )
+            return CONF_ERR_CANNOT_CONNECT
+
+        res = await resp.text()
+
+        try:
+            resp_json = json.loads(res)
+        except Exception as error:
+            _LOGGER.error(
+                f"Unable to fetch data from EVN Server while loging in: {error}"
+            )
+            return CONF_ERR_UNKNOWN
+
+        if ("error" in resp_json) and (resp_json["error"] == "invalid_grant"):
+            return CONF_ERR_INVALID_AUTH
+
         elif "access_token" in resp_json:
             self._evn_area["access_token"] = resp_json["access_token"]
             return CONF_SUCCESS
@@ -201,7 +255,9 @@ class EVNAPI:
         _LOGGER.error(f"Unable to login into EVN Endpoint: {resp_json}")
         return CONF_ERR_INVALID_AUTH
 
-    async def request_update_evnhanoi(self, customer_id, start_datetime, end_datetime):
+    async def request_update_evnhanoi(
+        self, customer_id, start_datetime, end_datetime, last_index="001"
+    ):
         """Request new update from EVNHANOI Server"""
 
         headers = {
@@ -211,17 +267,21 @@ class EVNAPI:
         }
 
         data = {
-            "maDiemDo": f"{customer_id}001",
+            "maDiemDo": f"{customer_id}{last_index}",
             "maDonVi": f"{customer_id[0:6]}",
             "maXacThuc": "EVNHN",
             "ngayDau": start_datetime,
             "ngayCuoi": end_datetime,
         }
-        
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+
         resp = await self._session.post(
             url=self._evn_area.get("evn_data_request_url"),
             data=json.dumps(data),
-            headers=headers
+            headers=headers,
+            ssl=ssl_context,
         )
 
         if resp.status != 200:
@@ -229,7 +289,7 @@ class EVNAPI:
                 f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
             )
             return {"status": "error", "data": resp.status}
-        
+
         try:
             res = await resp.text()
             resp_json = json.loads(res)
@@ -246,14 +306,69 @@ class EVNAPI:
             _LOGGER.error(f"Cannot request new data from EVN Server: {resp_json}")
 
             if resp_json["code"] == 400:
+
+                if last_index == "001":
+                    return await self.request_update_evnhanoi(
+                        customer_id, start_datetime, end_datetime, "1"
+                    )
+
                 return {"status": CONF_ERR_INVALID_ID, "data": resp_json}
 
             return {"status": state, "data": resp_json}
 
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: float(resp_json["data"]["chiSoNgayFull"][-1]["chiSo"]) - float(resp_json["data"]["chiSoNgayFull"][-2]["chiSo"]),
+            ID_ECON_PER_DAY: float(resp_json["data"]["chiSoNgayFull"][-1]["chiSo"])
+            - float(resp_json["data"]["chiSoNgayFull"][-2]["chiSo"]),
             ID_ECON_PER_MONTH: float(resp_json["data"]["tongSanLuong"]["kt"]),
+        }
+
+    async def request_update_evncpc(self, customer_id, start_datetime, end_datetime):
+        """Request new update from EVNCPC Server"""
+
+        headers = {"Authorization": f"Bearer {self._evn_area.get('access_token')}"}
+
+        resp = await self._session.get(
+            url=f"{self._evn_area.get('evn_data_request_url')}{customer_id}",
+            headers=headers,
+        )
+
+        res = await resp.text()
+
+        print(res)
+        if resp.status != 200:
+            _LOGGER.error(
+                f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
+            )
+            return {"status": "error", "data": resp.status}
+
+        try:
+
+            resp_json = json.loads(res)
+
+            print(resp)
+
+            state = CONF_SUCCESS if bool(resp_json) else CONF_SUCCESS
+
+        except Exception as error:
+            _LOGGER.error(
+                f"Unable to fetch data from EVN Server while requesting new data: {error}"
+            )
+            return {"status": "error", "data": error}
+
+        if state != CONF_SUCCESS:
+            _LOGGER.error(f"Cannot request new data from EVN Server: {resp_json}")
+
+            return {"status": state, "data": resp_json}
+
+        return {
+            "status": CONF_SUCCESS,
+            ID_ECON_PER_DAY: float(
+                resp_json["electricConsumption"]["electricConsumptionToday"]
+            ),
+            ID_ECON_PER_MONTH: float(
+                resp_json["electricConsumption"]["electricConsumptionThisMonth"]
+            ),
         }
 
     async def request_update_evnhcmc(self, customer_id, start_datetime, end_datetime):
@@ -360,11 +475,14 @@ class EVNAPI:
 
             error = CONF_ERR_INVALID_ID
 
-            table = soup.findAll('div',attrs={"class":"box-information"})
+            table = soup.findAll("div", attrs={"class": "box-information"})
             for x in table:
-                if x.find('p').text == "Quý khách hàng hiện không có thông tin sản lượng điện tiêu thụ trong ngày.":
+                if (
+                    x.find("p").text
+                    == "Quý khách hàng hiện không có thông tin sản lượng điện tiêu thụ trong ngày."
+                ):
                     error = CONF_ERR_NO_MONITOR
-            
+
             _LOGGER.error(
                 "Cannot request new data from EVN Server: Invalid EVN Customer ID"
             )
@@ -375,14 +493,21 @@ class EVNAPI:
 
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: round(float(data_list[-1]["value"]) - float(data_list[-2]["value"]), 2),
-            ID_ECON_PER_MONTH: round(float(data_list[-1]["value"]) - float(data_list[0]["value"]), 2),
+            ID_ECON_PER_DAY: round(
+                float(data_list[-1]["value"]) - float(data_list[-2]["value"]), 2
+            ),
+            ID_ECON_PER_MONTH: round(
+                float(data_list[-1]["value"]) - float(data_list[0]["value"]), 2
+            ),
         }
 
     async def request_update_evnnpc(self, customer_id, start_datetime, end_datetime):
         """Request new update from EVNNPC Server"""
 
         try:
+            ssl_context = ssl.create_default_context()
+            ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+
             resp = await self._session.get(
                 url=self._evn_area.get("evn_data_request_url"),
                 params={
@@ -390,9 +515,9 @@ class EVNAPI:
                     "STARTTIME": start_datetime.replace("/", "-"),
                     "STOPTIME": end_datetime.replace("/", "-"),
                 },
+                ssl=ssl_context,
             )
             res = await resp.text()
-
 
         except Exception as error:
             _LOGGER.error(
@@ -410,10 +535,17 @@ class EVNAPI:
             resp_json = json.loads(res)
 
             if "không tính được sản lượng" in resp_json[0].get("GHI_CHU"):
-                return {
-                    "status": CONF_ERR_NO_MONITOR,
-                    "data": str(resp_json[0]),
-                }
+                if len(resp_json) == 1:
+                    return {
+                        "status": CONF_ERR_NO_MONITOR,
+                        "data": str(resp_json[0]),
+                    }
+
+            info_list = []
+
+            for each_entity in resp_json:
+                if "Trạng thái Sản lượng điện tiêu thụ OK" in each_entity["GHI_CHU"]:
+                    info_list.append(each_entity)
 
         except Exception as error:
             _LOGGER.error(
@@ -425,15 +557,26 @@ class EVNAPI:
                 "data": "Cannot request e-consumption data",
             }
 
+        if len(info_list) == 1:
+            return {
+                "status": CONF_SUCCESS,
+                ID_ECON_PER_DAY: float(info_list[0]["SAN_LUONG"]),
+                ID_ECON_PER_MONTH: round(
+                    float(info_list[0]["CHI_SO_KET_THUC"])
+                    - float(info_list[0]["CHI_SO_BAT_DAU"]),
+                    2,
+                ),
+            }
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: float(resp_json[1]["SAN_LUONG"]),
+            ID_ECON_PER_DAY: float(info_list[-1]["SAN_LUONG"]),
             ID_ECON_PER_MONTH: round(
-                float(resp_json[0]["CHI_SO_KET_THUC"])
-                - float(resp_json[-1]["CHI_SO_BAT_DAU"]),
+                float(info_list[0]["CHI_SO_KET_THUC"])
+                - float(info_list[1]["CHI_SO_BAT_DAU"]),
                 2,
             ),
         }
+
 
 def get_evn_info(evn_customer_id: str):
     """Get EVN infomations based on Customer ID -> EVN Company, location, branches,..."""
@@ -469,23 +612,30 @@ def get_evn_info(evn_customer_id: str):
 
     return {"status": CONF_ERR_UNKNOWN}
 
-def generate_datetime(monthly_start: int, offset = 0):
+
+def generate_datetime(monthly_start: int, offset=0):
     """Generate Datetime as string for requesting data purposes"""
     time_obj = datetime.now()
     current_day = int(time_obj.strftime("%-d"))
     monthly_start_str = "{:0>2}".format(monthly_start)
-    
+
     if current_day == monthly_start + 1:
         last_month = int(time_obj.strftime("%-m")) - 1
 
         last_month_str = "{:0>2}".format(last_month)
-        start_datetime = f"{monthly_start_str}/{last_month_str}/{time_obj.strftime('%Y')}"
-        end_datetime = f"{'{:0>2}'.format(current_day - 1 + offset)}/{time_obj.strftime('%m/%Y')}"
+        start_datetime = (
+            f"{monthly_start_str}/{last_month_str}/{time_obj.strftime('%Y')}"
+        )
+        end_datetime = (
+            f"{'{:0>2}'.format(current_day - 1 + offset)}/{time_obj.strftime('%m/%Y')}"
+        )
 
         return start_datetime, end_datetime
 
     start_datetime = ""
-    end_datetime = f"{'{:0>2}'.format(current_day - 1 + offset)}/{time_obj.strftime('%m/%Y')}"
+    end_datetime = (
+        f"{'{:0>2}'.format(current_day - 1 + offset)}/{time_obj.strftime('%m/%Y')}"
+    )
 
     if current_day > monthly_start:
         start_datetime = f"{monthly_start_str}/{time_obj.strftime('%m/%Y')}"
@@ -502,6 +652,7 @@ def generate_datetime(monthly_start: int, offset = 0):
             start_datetime = f"{monthly_start_str}/12/{last_year}"
 
     return start_datetime, end_datetime
+
 
 def calc_ecost(kwh: float) -> str:
     """Calculate electric cost based on e-consumption"""

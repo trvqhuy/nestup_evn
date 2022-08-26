@@ -5,6 +5,7 @@ from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
 
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Establish connection with EVN Cloud."""
     hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {}).update(entry.data)

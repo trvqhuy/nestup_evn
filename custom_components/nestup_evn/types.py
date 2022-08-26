@@ -108,9 +108,9 @@ VIETNAM_EVN_AREA = [
     Area(
         EVN_NAME.CPC,
         "Khu vực miền Trung",
-        "NOT_YET_SUPPORTED",
-        "NOT_YET_SUPPORTED",
-        True,
+        "https://cskh-api.cpc.vn/connect/token",
+        "https://cskh-api.cpc.vn/api/cskh/power-consumption-alerts/by-customer-code/",
+        False,
         True,
         ["PQ", "PC", "PP"],
     ),
