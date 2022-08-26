@@ -493,12 +493,8 @@ class EVNAPI:
 
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: round(
-                float(data_list[-1]["value"]) - float(data_list[-2]["value"]), 2
-            ),
-            ID_ECON_PER_MONTH: round(
-                float(data_list[-1]["value"]) - float(data_list[0]["value"]), 2
-            ),
+            ID_ECON_PER_DAY: float(data_list[-1]["value"]),
+            ID_ECON_PER_MONTH: float(resp_json["total"]),
         }
 
     async def request_update_evnnpc(self, customer_id, start_datetime, end_datetime):
@@ -544,7 +540,7 @@ class EVNAPI:
             info_list = []
 
             for each_entity in resp_json:
-                if "Trạng thái Sản lượng điện tiêu thụ OK" in each_entity["GHI_CHU"]:
+                if "Sản lượng điện tiêu thụ của khách hàng" in each_entity["GHI_CHU"]:
                     info_list.append(each_entity)
 
         except Exception as error:
@@ -569,10 +565,10 @@ class EVNAPI:
             }
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: float(info_list[-1]["SAN_LUONG"]),
+            ID_ECON_PER_DAY: float(info_list[1]["SAN_LUONG"]),
             ID_ECON_PER_MONTH: round(
                 float(info_list[0]["CHI_SO_KET_THUC"])
-                - float(info_list[1]["CHI_SO_BAT_DAU"]),
+                - float(info_list[-1]["CHI_SO_BAT_DAU"]),
                 2,
             ),
         }
