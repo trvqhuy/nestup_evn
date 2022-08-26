@@ -6,7 +6,7 @@
 
 #### [English](https://github.com/trvqhuy/ha-evn/blob/main/README.md) | Tiếng Việt
 
-Từ việc sử dụng các phương thức có sẵn từ module **AIOHTTP** thông qua giao thức **HTTP(S)** cơ bản, công cụ có thể theo dõi dữ liệu điện năng tiêu thụ từ [EVN](https://www.evn.com.vn) trực tiếp trong [Home Assistant](https://www.home-assistant.io), hiện tại đã hỗ trợ cho một số vùng miền cùng với chi nhánh EVN tương ứng tại Việt Nam (xem tại [danh sách phía dưới](https://github.com/trvqhuy/nestup_evn/edit/main/README_vn.md#l%C6%B0u-%C3%BD-tr%C6%B0%E1%BB%9Bc-khi-c%C3%A0i-%C4%91%E1%BA%B7t)).
+Từ việc sử dụng các phương thức có sẵn từ module **AIOHTTP** thông qua giao thức **HTTP(S)** cơ bản, công cụ có thể theo dõi dữ liệu điện năng tiêu thụ từ [EVN](https://www.evn.com.vn) trực tiếp trong [Home Assistant](https://www.home-assistant.io), hiện tại đã hỗ trợ cho **tất cả vùng miền** tại Việt Nam cùng với chi nhánh EVN tương ứng (xem tại [danh sách phía dưới](https://github.com/trvqhuy/nestup_evn/edit/main/README_vn.md#l%C6%B0u-%C3%BD-tr%C6%B0%E1%BB%9Bc-khi-c%C3%A0i-%C4%91%E1%BA%B7t)).
 
 Công cụ hỗ trợ cài đặt và chỉnh sửa trực tiếp thông qua UI, dễ dàng quản lí các thông số điện tiêu thụ qua các thiết bị theo dõi tập trung.
 
@@ -23,9 +23,7 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
 | EVNSPC | Các tỉnh miền Nam | ☑️ |   | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
 | EVNNPC | Các tỉnh miền Bắc | ☑️ |   | [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
 | EVNHANOI | Thành phố Hà Nội | ☑️ | ☑️ | [Link](https://evnhanoi.vn/infomation/lien-he)
-| EVNCPC | Các tỉnh miền Trung | (chưa hỗ trợ) | ? | [Link](https://cskh.cpc.vn/lien-he)
-
-> Nếu khu vực của bạn chưa được hỗ trợ, hãy liên hệ [maintainer][maintenance] của repo này. 
+| EVNCPC | Các tỉnh miền Trung | ☑️ | ☑️ | [Link](https://cskh.cpc.vn/lien-he)
     
 ## Cài đặt
 #### **Chú ý:** Sử dụng 1 trong những cách phía dưới để cài đặt công cụ vào HA.
@@ -107,13 +105,19 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
     
 2. Chu kì cập nhật dữ liệu mới từ EVN:
 
-    ` 30 phút ` là chu kì mặc định giữa các lần cập nhật dữ liệu điện tiêu thụ từ EVN.
+    ` 60 phút ` là chu kì mặc định giữa các lần cập nhật dữ liệu điện tiêu thụ từ EVN.
 
-## Hỗ trợ
+## Dành cho dự án
 
-> Nếu như khu vực của bạn **chưa được** hỗ trợ bởi công cụ này, xin hãy để lại tin nhắn vào mail tại [đây][maintenance].
+#### Xin phép được gửi lời cảm ơn đến:
 
-> À, maintainer của repo này cũng muốn cảm ơn chính bản thân vì đã tạo ra công cụ này cho cộng đồng HA.
+- Anh **Pham Dinh Hai** và anh **Huynh Nhat**, vì đã tin tưởng, cung cấp thông tin tài khoản EVNHANOI và EVNCPC, nhờ vậy chủ repo có đủ điều kiện cần thiết để code hỗ trợ cho khu vực Hà Nội và miền Trung Việt Nam.  
+
+- Anh **Nguyen Huu Thanh**, vì những đóng góp cực kì nhiệt tình đối với khu vực EVNCPC miền Trung.
+
+> Không có những người kể trên, repo `nestup_evn` sẽ không ở đây, trở thành một dự án open-source tới cộng đồng HA Việt Nam.
+
+> Lời cuối, chủ repo cũng muốn tự cảm ơn bản thân vì đã kiên trì tạo ra integration này dành cho mọi người.
 
 [hacs]: https://github.com/custom-components/hacs
 [hacs-badge]: https://img.shields.io/badge/HACS-default-0468BF.svg?style=for-the-badge
