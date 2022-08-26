@@ -152,10 +152,10 @@ class EVNAPI:
             )
             return CONF_ERR_CANNOT_CONNECT
 
-        res = await resp.text()
-
         try:
+            res = await resp.text()
             resp_json = json.loads(res)
+
         except Exception as error:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while loging in: {error}"
@@ -184,7 +184,8 @@ class EVNAPI:
         }
 
         resp = await self._session.post(
-            url=self._evn_area.get("evn_login_url"), data=payload
+            url=self._evn_area.get("evn_login_url"), 
+            data=payload,
         )
 
         if resp.status != 200:
@@ -199,10 +200,10 @@ class EVNAPI:
             )
             return CONF_ERR_CANNOT_CONNECT
 
-        res = await resp.text()
-
         try:
+            res = await resp.text()
             resp_json = json.loads(res)
+
         except Exception as error:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while loging in: {error}"
@@ -237,10 +238,10 @@ class EVNAPI:
             )
             return CONF_ERR_CANNOT_CONNECT
 
-        res = await resp.text()
-
         try:
+            res = await resp.text()
             resp_json = json.loads(res)
+
         except Exception as error:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while loging in: {error}"
@@ -303,8 +304,7 @@ class EVNAPI:
             return {"status": "error", "data": error}
 
         if state != CONF_SUCCESS:
-            _LOGGER.error(f"Cannot request new data from EVN Server: {resp_json}")
-
+            
             if resp_json["code"] == 400:
 
                 if last_index == "001":
@@ -313,6 +313,8 @@ class EVNAPI:
                     )
 
                 return {"status": CONF_ERR_INVALID_ID, "data": resp_json}
+
+            _LOGGER.error(f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}")
 
             return {"status": state, "data": resp_json}
 
@@ -333,9 +335,6 @@ class EVNAPI:
             headers=headers,
         )
 
-        res = await resp.text()
-
-        print(res)
         if resp.status != 200:
             _LOGGER.error(
                 f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
@@ -343,10 +342,9 @@ class EVNAPI:
             return {"status": "error", "data": resp.status}
 
         try:
+            res = await resp.text()
 
             resp_json = json.loads(res)
-
-            print(resp)
 
             state = CONF_SUCCESS if bool(resp_json) else CONF_SUCCESS
 
@@ -357,7 +355,7 @@ class EVNAPI:
             return {"status": "error", "data": error}
 
         if state != CONF_SUCCESS:
-            _LOGGER.error(f"Cannot request new data from EVN Server: {resp_json}")
+            _LOGGER.error(f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}")
 
             return {"status": state, "data": resp_json}
 
@@ -405,7 +403,7 @@ class EVNAPI:
             return {"status": "error", "data": error}
 
         if state != CONF_SUCCESS:
-            _LOGGER.error(f"Cannot request new data from EVN Server: {resp_json}")
+            _LOGGER.error(f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}")
             return {"status": state, "data": resp_json}
 
         return {
@@ -431,20 +429,20 @@ class EVNAPI:
             ssl=False,
         )
 
+        if resp.status != 200:
+            _LOGGER.error(
+                f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
+            )
+            return {"status": "error", "data": resp.status}
+
         try:
             res = await resp.text()
-
+            
         except Exception as error:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
             return {"status": "error", "data": error}
-
-        if resp.status != 200:
-            _LOGGER.error(
-                f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
-            )
-            return {"status": "error", "data": res}
 
         resp_json = {}
 
@@ -513,7 +511,6 @@ class EVNAPI:
                 },
                 ssl=ssl_context,
             )
-            res = await resp.text()
 
         except Exception as error:
             _LOGGER.error(
@@ -525,17 +522,11 @@ class EVNAPI:
             _LOGGER.error(
                 f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
             )
-            return {"status": "error", "data": res}
+            return {"status": "error", "data": resp.status}
 
         try:
+            res = await resp.text()
             resp_json = json.loads(res)
-
-            if "không tính được sản lượng" in resp_json[0].get("GHI_CHU"):
-                if len(resp_json) == 1:
-                    return {
-                        "status": CONF_ERR_NO_MONITOR,
-                        "data": str(resp_json[0]),
-                    }
 
             info_list = []
 
@@ -553,7 +544,13 @@ class EVNAPI:
                 "data": "Cannot request e-consumption data",
             }
 
-        if len(info_list) == 1:
+        if info_list == []:
+            return {
+                "status": CONF_ERR_NO_MONITOR,
+                "data": str(resp_json[0]),
+            }
+
+        elif len(info_list) == 1:
             return {
                 "status": CONF_SUCCESS,
                 ID_ECON_PER_DAY: float(info_list[0]["SAN_LUONG"]),
@@ -563,6 +560,7 @@ class EVNAPI:
                     2,
                 ),
             }
+        
         return {
             "status": CONF_SUCCESS,
             ID_ECON_PER_DAY: float(info_list[1]["SAN_LUONG"]),

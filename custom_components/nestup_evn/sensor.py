@@ -85,13 +85,18 @@ class EVNDevice:
             if login_state != CONF_SUCCESS:
                 return
 
-        _LOGGER.info(
-            "[EVN Monitor] Updating data for EVN Customer ID: %s", self._customer_id
-        )
-
         self._data = await self._api.request_update(
             self._area_name, self._customer_id, self._monthly_start
         )
+        
+        if self._data["status"] == CONF_SUCCESS:
+            _LOGGER.info(
+                "Successfully fetched new data for EVN Customer ID: %s", self._customer_id
+            )
+        else:
+            _LOGGER.warn(
+                "Could not fetch new data for EVN Customer ID: %s", self._customer_id
+            )
 
         return self._data
 

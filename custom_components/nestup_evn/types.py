@@ -110,7 +110,7 @@ VIETNAM_EVN_AREA = [
         "Khu vực miền Trung",
         "https://cskh-api.cpc.vn/connect/token",
         "https://cskh-api.cpc.vn/api/cskh/power-consumption-alerts/by-customer-code/",
-        False,
+        True,
         True,
         ["PQ", "PC", "PP"],
     ),
@@ -119,7 +119,7 @@ VIETNAM_EVN_AREA = [
 EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     EVNSensorEntityDescription(
         key=ID_ECON_PER_DAY,
-        name="Chỉ số ngày (mới nhất)",
+        name="Sản lượng ngày (mới nhất)",
         icon="mdi:flash-outline",
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
@@ -128,7 +128,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
     ),
     EVNSensorEntityDescription(
         key=ID_ECON_PER_MONTH,
-        name="Chỉ số tháng (tạm tính)",
+        name="Sản lượng tháng (tạm tính)",
         icon="mdi:flash-outline",
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
         state_class=SensorStateClass.MEASUREMENT,
