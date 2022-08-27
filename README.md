@@ -119,7 +119,7 @@ Starting from the v1.2.5 version, the component has successfully provided suppor
 
 ### Special thanks to:
 - **Mr. Pham Dinh Hai** and **Mr. Huynh Nhat** for believing and providing the author his EVN Credentials, thus the project could be available for those living in Hanoi Capital and Central Vietnam.
-- **Mr. Nguyen Huu Thanh** for giving a huge support to the author.
+- **Mr. Hoang Tung V** for giving a huge support to the author.
 
 > Without those guys, the `nestup_evn` repo would not be here, being an open-source integration to the community.
 
