@@ -58,7 +58,7 @@ class EVNDevice:
         """Construct Device wrapper."""
 
         self._name = f"{CONF_DEVICE_NAME}: {dataset[CONF_CUSTOMER_ID]}"
-        self._coordinator: DataUpdateCoordinator | None = None
+        self._coordinator: DataUpdateCoordinator = None
 
         if CONF_USERNAME in dataset:
             self._username = dataset[CONF_USERNAME]
@@ -122,16 +122,23 @@ class EVNDevice:
     @property
     def info(self) -> DeviceInfo:
         """Return device description for device registry."""
+        evn_area = nestup_evn.get_evn_info(self._customer_id)
+        hw_version = f"by {self._area_name['name']}"
+
+        if (evn_area["status"] == CONF_SUCCESS) and (evn_area["evn_branch"] != "Unknown"):
+            hw_version = f"by {evn_area['evn_branch']}"
+
         return DeviceInfo(
             name=self._name,
             identifiers={(DOMAIN, self._customer_id)},
             manufacturer=CONF_DEVICE_MANUFACTURER,
             sw_version=CONF_DEVICE_SW_VERSION,
+            hw_version=hw_version,
             model=CONF_DEVICE_MODEL,
         )
 
     @property
-    def coordinator(self) -> DataUpdateCoordinator | None:
+    def coordinator(self) -> DataUpdateCoordinator or None:
         """Return coordinator associated."""
         return self._coordinator
 

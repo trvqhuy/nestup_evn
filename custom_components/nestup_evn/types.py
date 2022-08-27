@@ -29,7 +29,7 @@ class Entity:
     entity_class: str
     unit: str
     icon: str
-    state_class: SensorStateClass | None
+    state_class: SensorStateClass or None
 
 
 @dataclass
