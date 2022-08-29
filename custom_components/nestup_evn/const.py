@@ -9,7 +9,7 @@ DOMAIN = "nestup_evn"
 CONF_DEVICE_NAME = "EVN Monitor"
 CONF_DEVICE_MODEL = "Vietnam EVN Monitor"
 CONF_DEVICE_MANUFACTURER = "Nestup Co."
-CONF_DEVICE_SW_VERSION = "1.2.6"
+CONF_DEVICE_SW_VERSION = "1.2.7"
 
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"
