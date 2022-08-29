@@ -35,7 +35,7 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
     > HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > `Chọn phiên bản mới nhất` > Download this repository
     
 3. Khởi động lại HomeAssistant.
-4. Cài đặt thành công, tiếp theo đến bước [Config](https://github.com/trvqhuy/nestup_evn/edit/main/README.md#setup-and-configurations) để hoàn thành.
+4. Cài đặt thành công, tiếp theo đến bước [Config](https://github.com/trvqhuy/nestup_evn/blob/main/README_vn.md#thi%E1%BA%BFt-l%E1%BA%ADp-v%C3%A0-ch%E1%BB%89nh-s%E1%BB%ADa) để hoàn thành.
 
 ### Method 2: Cài đặt thủ công thông qua Samba / SFTP
 1. Tải phiên bản mới nhất của công cụ thông qua [Github](https://github.com/trvqhuy/nestup_evn.git).
