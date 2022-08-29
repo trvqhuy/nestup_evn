@@ -2,7 +2,6 @@
 
 from dataclasses import asdict
 from datetime import datetime, timedelta
-from dateutil import parser
 import json
 import logging
 import os
@@ -10,6 +9,7 @@ import ssl
 from typing import Any
 
 from bs4 import BeautifulSoup
+from dateutil import parser
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import (
@@ -121,12 +121,11 @@ class EVNAPI:
                 }
             )
 
-            if not ID_FROM_DATE in fetch_data:
+            if ID_FROM_DATE not in fetch_data:
                 fetch_data[ID_FROM_DATE] = from_date
 
-            if not ID_TO_DATE in fetch_data:
+            if ID_TO_DATE not in fetch_data:
                 fetch_data[ID_TO_DATE] = to_date
-                
 
         return fetch_data
 
@@ -190,7 +189,7 @@ class EVNAPI:
         }
 
         resp = await self._session.post(
-            url=self._evn_area.get("evn_login_url"), 
+            url=self._evn_area.get("evn_login_url"),
             data=payload,
         )
 
@@ -309,7 +308,7 @@ class EVNAPI:
             return {"status": "error", "data": error}
 
         if state != CONF_SUCCESS:
-            
+
             if resp_json["code"] == 400:
 
                 if last_index == "001":
@@ -319,18 +318,25 @@ class EVNAPI:
 
                 return {"status": CONF_ERR_INVALID_ID, "data": resp_json}
 
-            _LOGGER.error(f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}")
+            _LOGGER.error(
+                f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}"
+            )
 
             return {"status": state, "data": resp_json}
 
-        last_day =  parser.parse(resp_json["data"]["tongSanLuong"]["ngayCuoiKy"]) - timedelta(days=1)
+        last_day = parser.parse(
+            resp_json["data"]["tongSanLuong"]["ngayCuoiKy"]
+        ) - timedelta(days=1)
 
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: round(float(resp_json["data"]["chiSoNgay"][-1]["sg"])
-            - float(resp_json["data"]["chiSoNgay"][-2]["sg"]), 2),
+            ID_ECON_PER_DAY: round(
+                float(resp_json["data"]["chiSoNgay"][-1]["sg"])
+                - float(resp_json["data"]["chiSoNgay"][-2]["sg"]),
+                2,
+            ),
             ID_ECON_PER_MONTH: round(float(resp_json["data"]["tongSanLuong"]["sg"]), 2),
-            ID_TO_DATE: last_day.strftime('%-d/%m/%Y'),
+            ID_TO_DATE: last_day.strftime("%-d/%m/%Y"),
         }
 
     async def request_update_evncpc(self, customer_id, start_datetime, end_datetime):
@@ -363,7 +369,9 @@ class EVNAPI:
             return {"status": "error", "data": error}
 
         if state != CONF_SUCCESS:
-            _LOGGER.error(f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}")
+            _LOGGER.error(
+                f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}"
+            )
 
             return {"status": state, "data": resp_json}
 
@@ -411,7 +419,9 @@ class EVNAPI:
             return {"status": "error", "data": error}
 
         if state != CONF_SUCCESS:
-            _LOGGER.error(f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}")
+            _LOGGER.error(
+                f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}"
+            )
             return {"status": state, "data": resp_json}
 
         return {
@@ -446,7 +456,7 @@ class EVNAPI:
 
         try:
             res = await resp.text()
-            
+
         except Exception as error:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data: {error}"
@@ -496,14 +506,14 @@ class EVNAPI:
 
             return {"status": error, "data": soup}
 
-        data_list = list(resp_json["data"])        
-        last_day =  parser.parse(data_list[-1]["date"]) - timedelta(days=1)
+        data_list = list(resp_json["data"])
+        last_day = parser.parse(data_list[-1]["date"]) - timedelta(days=1)
 
         return {
             "status": CONF_SUCCESS,
             ID_ECON_PER_DAY: float(data_list[-1]["value"]),
             ID_ECON_PER_MONTH: float(resp_json["total"]),
-            ID_TO_DATE: last_day.strftime('%d/%m/%Y'),
+            ID_TO_DATE: last_day.strftime("%d/%m/%Y"),
         }
 
     async def request_update_evnnpc(self, customer_id, start_datetime, end_datetime):
@@ -555,7 +565,7 @@ class EVNAPI:
                 "data": "Cannot request e-consumption data",
             }
 
-        last_day =  parser.parse(info_list[0]["THOI_GIAN_BAT_DAU"])
+        last_day = parser.parse(info_list[0]["THOI_GIAN_BAT_DAU"])
 
         if info_list == []:
             return {
@@ -572,9 +582,9 @@ class EVNAPI:
                     - float(info_list[0]["CHI_SO_BAT_DAU"]),
                     2,
                 ),
-                ID_TO_DATE: last_day.strftime('%d/%m/%Y'),
+                ID_TO_DATE: last_day.strftime("%d/%m/%Y"),
             }
-        
+
         return {
             "status": CONF_SUCCESS,
             ID_ECON_PER_DAY: float(info_list[0]["SAN_LUONG"]),
@@ -583,7 +593,7 @@ class EVNAPI:
                 - float(info_list[-1]["CHI_SO_BAT_DAU"]),
                 2,
             ),
-            ID_TO_DATE: last_day.strftime('%d/%m/%Y'),
+            ID_TO_DATE: last_day.strftime("%d/%m/%Y"),
         }
 
 

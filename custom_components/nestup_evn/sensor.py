@@ -88,10 +88,11 @@ class EVNDevice:
         self._data = await self._api.request_update(
             self._area_name, self._customer_id, self._monthly_start
         )
-        
+
         if self._data["status"] == CONF_SUCCESS:
             _LOGGER.info(
-                "Successfully fetched new data for EVN Customer ID: %s", self._customer_id
+                "Successfully fetched new data for EVN Customer ID: %s",
+                self._customer_id,
             )
         else:
             _LOGGER.warn(
@@ -125,7 +126,9 @@ class EVNDevice:
         evn_area = nestup_evn.get_evn_info(self._customer_id)
         hw_version = f"by {self._area_name['name']}"
 
-        if (evn_area["status"] == CONF_SUCCESS) and (evn_area["evn_branch"] != "Unknown"):
+        if (evn_area["status"] == CONF_SUCCESS) and (
+            evn_area["evn_branch"] != "Unknown"
+        ):
             hw_version = f"by {evn_area['evn_branch']}"
 
         return DeviceInfo(
