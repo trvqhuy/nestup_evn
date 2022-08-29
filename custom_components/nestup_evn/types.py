@@ -131,7 +131,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
         name="Sản lượng tháng (tạm tính)",
         icon="mdi:flash-outline",
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
-        state_class=SensorStateClass.MEASUREMENT,
+        state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: data[ID_ECON_PER_MONTH],
     ),

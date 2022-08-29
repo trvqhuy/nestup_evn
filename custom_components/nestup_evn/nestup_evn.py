@@ -1,7 +1,8 @@
 """Setup and manage the EVN API."""
 
 from dataclasses import asdict
-from datetime import datetime
+from datetime import datetime, timedelta
+from dateutil import parser
 import json
 import logging
 import os
@@ -116,11 +117,16 @@ class EVNAPI:
                 {
                     ID_ECOST_PER_DAY: calc_ecost(fetch_data[ID_ECON_PER_DAY]),
                     ID_ECOST_PER_MONTH: calc_ecost(fetch_data[ID_ECON_PER_MONTH]),
-                    ID_FROM_DATE: from_date,
-                    ID_TO_DATE: to_date,
                     ID_LATEST_UPDATE: datetime.now().astimezone(),
                 }
             )
+
+            if not ID_FROM_DATE in fetch_data:
+                fetch_data[ID_FROM_DATE] = from_date
+
+            if not ID_TO_DATE in fetch_data:
+                fetch_data[ID_TO_DATE] = to_date
+                
 
         return fetch_data
 
@@ -294,7 +300,6 @@ class EVNAPI:
         try:
             res = await resp.text()
             resp_json = json.loads(res)
-
             state = CONF_ERR_UNKNOWN if resp_json["isError"] else CONF_SUCCESS
 
         except Exception as error:
@@ -318,11 +323,14 @@ class EVNAPI:
 
             return {"status": state, "data": resp_json}
 
+        last_day =  parser.parse(resp_json["data"]["tongSanLuong"]["ngayCuoiKy"]) - timedelta(days=1)
+
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: float(resp_json["data"]["chiSoNgayFull"][-1]["chiSo"])
-            - float(resp_json["data"]["chiSoNgayFull"][-2]["chiSo"]),
-            ID_ECON_PER_MONTH: float(resp_json["data"]["tongSanLuong"]["kt"]),
+            ID_ECON_PER_DAY: round(float(resp_json["data"]["chiSoNgay"][-1]["sg"])
+            - float(resp_json["data"]["chiSoNgay"][-2]["sg"]), 2),
+            ID_ECON_PER_MONTH: round(float(resp_json["data"]["tongSanLuong"]["sg"]), 2),
+            ID_TO_DATE: last_day.strftime('%-d/%m/%Y'),
         }
 
     async def request_update_evncpc(self, customer_id, start_datetime, end_datetime):
@@ -410,6 +418,7 @@ class EVNAPI:
             "status": CONF_SUCCESS,
             ID_ECON_PER_DAY: float(resp_json["data"]["sanluong_tungngay"][-1]["Tong"]),
             ID_ECON_PER_MONTH: float(resp_json["data"]["sanluong_tong"]["Tong"]),
+            ID_TO_DATE: resp_json["data"]["sanluong_tungngay"][-1]["ngayFull"],
         }
 
     async def request_update_evnspc(self, customer_id, start_datetime, end_datetime):
@@ -487,12 +496,14 @@ class EVNAPI:
 
             return {"status": error, "data": soup}
 
-        data_list = list(resp_json["data"])
+        data_list = list(resp_json["data"])        
+        last_day =  parser.parse(data_list[-1]["date"]) - timedelta(days=1)
 
         return {
             "status": CONF_SUCCESS,
             ID_ECON_PER_DAY: float(data_list[-1]["value"]),
             ID_ECON_PER_MONTH: float(resp_json["total"]),
+            ID_TO_DATE: last_day.strftime('%d/%m/%Y'),
         }
 
     async def request_update_evnnpc(self, customer_id, start_datetime, end_datetime):
@@ -544,6 +555,8 @@ class EVNAPI:
                 "data": "Cannot request e-consumption data",
             }
 
+        last_day =  parser.parse(info_list[0]["THOI_GIAN_BAT_DAU"])
+
         if info_list == []:
             return {
                 "status": CONF_ERR_NO_MONITOR,
@@ -559,16 +572,18 @@ class EVNAPI:
                     - float(info_list[0]["CHI_SO_BAT_DAU"]),
                     2,
                 ),
+                ID_TO_DATE: last_day.strftime('%d/%m/%Y'),
             }
         
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: float(info_list[1]["SAN_LUONG"]),
+            ID_ECON_PER_DAY: float(info_list[0]["SAN_LUONG"]),
             ID_ECON_PER_MONTH: round(
                 float(info_list[0]["CHI_SO_KET_THUC"])
                 - float(info_list[-1]["CHI_SO_BAT_DAU"]),
                 2,
             ),
+            ID_TO_DATE: last_day.strftime('%d/%m/%Y'),
         }
 
 

@@ -26,12 +26,12 @@ _LOGGER = logging.getLogger(__name__)
 
 CUSTOMER_ID_FIELD = (
     lambda data: {
-        vol.Required(CONF_CUSTOMER_ID): vol.All(str, vol.Length(min=13, max=13))
+        vol.Required(CONF_CUSTOMER_ID): vol.All(str, vol.Length(min=11, max=13))
     }
     if (data.get(CONF_CUSTOMER_ID) is None)
     else {
         vol.Required(CONF_CUSTOMER_ID, default=data.get(CONF_CUSTOMER_ID)): vol.All(
-            str, vol.Length(min=13, max=13)
+            str, vol.Length(min=11, max=13)
         )
     }
 )
