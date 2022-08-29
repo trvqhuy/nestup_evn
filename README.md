@@ -46,7 +46,7 @@ Starting from the v1.2.5 version, the component has successfully provided suppor
     > HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > Choose the latest version > Download this repository
     
 3. Reboot/restart your HA Server.
-4. Voilà, your installation is completed, now you should move to [Configurations](https://github.com/trvqhuy/nestup_evn/edit/main/README.md#setup-and-configurations) section to complete.
+4. Voilà, your installation is completed, now you should move to [Configurations](https://github.com/trvqhuy/nestup_evn#setup-and-configurations) section to complete.
 
 ### Method 2: Manual installation via Samba / SFTP
 1. Clone/download the latest release (or the repos. master branch).
