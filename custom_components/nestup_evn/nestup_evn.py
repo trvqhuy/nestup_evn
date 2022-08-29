@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import json
 import logging
 import os
+from pprint import pprint
 import ssl
 from typing import Any
 
@@ -294,7 +295,7 @@ class EVNAPI:
             _LOGGER.error(
                 f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
             )
-            return {"status": "error", "data": resp.status}
+            return {"status": CONF_ERR_CANNOT_CONNECT, "data": resp.status}
 
         try:
             res = await resp.text()
@@ -305,7 +306,7 @@ class EVNAPI:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
-            return {"status": "error", "data": error}
+            return {"status": CONF_ERR_UNKNOWN, "data": error}
 
         if state != CONF_SUCCESS:
 
@@ -353,7 +354,7 @@ class EVNAPI:
             _LOGGER.error(
                 f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
             )
-            return {"status": "error", "data": resp.status}
+            return {"status": CONF_ERR_CANNOT_CONNECT, "data": resp.status}
 
         try:
             res = await resp.text()
@@ -366,7 +367,7 @@ class EVNAPI:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
-            return {"status": "error", "data": error}
+            return {"status": CONF_ERR_UNKNOWN, "data": error}
 
         if state != CONF_SUCCESS:
             _LOGGER.error(
@@ -405,7 +406,7 @@ class EVNAPI:
             _LOGGER.error(
                 f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
             )
-            return {"status": "error", "data": resp.status}
+            return {"status": CONF_ERR_CANNOT_CONNECT, "data": resp.status}
 
         try:
             res = await resp.text()
@@ -416,7 +417,7 @@ class EVNAPI:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
-            return {"status": "error", "data": error}
+            return {"status": CONF_ERR_UNKNOWN, "data": error}
 
         if state != CONF_SUCCESS:
             _LOGGER.error(
@@ -452,7 +453,7 @@ class EVNAPI:
             _LOGGER.error(
                 f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
             )
-            return {"status": "error", "data": resp.status}
+            return {"status": CONF_ERR_CANNOT_CONNECT, "data": resp.status}
 
         try:
             res = await resp.text()
@@ -461,7 +462,7 @@ class EVNAPI:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
-            return {"status": "error", "data": error}
+            return {"status": CONF_ERR_UNKNOWN, "data": error}
 
         resp_json = {}
 
@@ -486,7 +487,7 @@ class EVNAPI:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data - {error}"
             )
-            return {"status": "error", "data": error}
+            return {"status": CONF_ERR_UNKNOWN, "data": error}
 
         if resp_json == {}:
 
@@ -537,13 +538,13 @@ class EVNAPI:
             _LOGGER.error(
                 f"Unable to fetch data from EVN Server while requesting new data: {error}"
             )
-            return {"status": "error", "data": error}
+            return {"status": CONF_ERR_UNKNOWN, "data": error}
 
         if resp.status != 200:
             _LOGGER.error(
                 f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
             )
-            return {"status": "error", "data": resp.status}
+            return {"status": CONF_ERR_CANNOT_CONNECT, "data": resp.status}
 
         try:
             res = await resp.text()

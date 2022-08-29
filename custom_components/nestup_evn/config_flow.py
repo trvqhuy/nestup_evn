@@ -145,7 +145,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle customer-id config flow by the user."""
 
         if user_input is not None:
-            self._user_data[CONF_CUSTOMER_ID] = user_input[CONF_CUSTOMER_ID]
+            self._user_data[CONF_CUSTOMER_ID] = user_input[CONF_CUSTOMER_ID].upper()
             return await self.async_step_evn_info()
 
         return self.async_show_form(

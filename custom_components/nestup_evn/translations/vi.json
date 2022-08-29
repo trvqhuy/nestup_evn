@@ -2,7 +2,8 @@
     "config": {
         "abort": {
             "already_configured": "Thiết bị liên kết với mã khách hàng này đã được thiết lập.",
-            "not_supported": "Dựa vào mã khách hàng EVN: **{customer_id}**\nTự động xác định server EVN:\n- Công ty thành viên: **{evn_name}**\n- Địa điểm: **{evn_location}**\n- Chi nhánh EVN: **{evn_branch}**\n\nTuy nhiên, khu vực của bạn chưa được hỗ trợ bởi công cụ.\nXin hãy liên hệ **github@trvqhuy**."
+            "not_supported": "Dựa vào mã khách hàng EVN: **{customer_id}**\nTự động xác định server EVN:\n- Công ty thành viên: **{evn_name}**\n- Địa điểm: **{evn_location}**\n- Chi nhánh EVN: **{evn_branch}**\n\nTuy nhiên, khu vực của bạn chưa được hỗ trợ bởi công cụ.\nXin hãy liên hệ **github@trvqhuy**.",
+            "unknown": "Mã khách hàng không hợp lệ: **{customer_id}**"
         },
         "error": {
             "cannot_connect": "Không thể kết nối đến máy chủ EVN.",

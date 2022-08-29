@@ -2,7 +2,8 @@
     "config": {
         "abort": {
             "already_configured": "A device with your Customer ID has already been configured.",
-            "not_supported": "Based on your Customer ID: **{customer_id}**\nAutomatically detect your EVN location:\n- EVN Company: **{evn_name}**\n- EVN Location: **{evn_location}**\n- EVN Branch: **{evn_branch}**\n\nUnfortunately, your EVN location has not been supported yet.\nPlease contact **github@trvqhuy**, together we could make it happen."
+            "not_supported": "Based on your Customer ID: **{customer_id}**\nAutomatically detect your EVN location:\n- EVN Company: **{evn_name}**\n- EVN Location: **{evn_location}**\n- EVN Branch: **{evn_branch}**\n\nUnfortunately, your EVN location has not been supported yet.\nPlease contact **github@trvqhuy**, together we could make it happen.",
+            "unknown": "Invalid EVN Customer ID: **{customer_id}**"
         },
         "error": {
             "cannot_connect": "Failed to connect to EVN Server.",
