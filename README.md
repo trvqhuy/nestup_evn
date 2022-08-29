@@ -38,17 +38,10 @@ Starting from the v1.2.5 version, the component has successfully provided suppor
 ## Installation
 #### **Note:** Choose 1 from the below methods for setting up the integration.
 ### Method 1: Installation via [HACS](https://hacs.xyz) (recommended).
-1. Add [**trvqhuy/nestup_evn**](https://github.com/trvqhuy/nestup_evn) custom repository to HACS.
 
-    > HACS > Integrations > `Triple dots (in the upper right corner)` > Custom repositories 
-    
-    ![download_01](screenshots/download_01.png) ![download_02](screenshots/download_02.png)
-    
-    > Enter `trvqhuy/nestup_evn` to `Repository` and choose `Integration` from `Category`
-    
-     ![download_03](screenshots/download_03.png)
+1. Download the repository to your HA Server.
 
-2. Download the repository to your HA Server.
+    ![download_03](screenshots/download_03.png)
 
     > HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > Choose the latest version > Download this repository
     
@@ -88,7 +81,7 @@ Starting from the v1.2.5 version, the component has successfully provided suppor
 
     **Requirements**: the ID must meet all of the conditions below:
 
-    - Consists of exactly **13** characters.
+    - Consists of **11** to **13** characters.
     - Starts with **'P'** letter.
     
     ![setup_02](screenshots/setup_02.png) 
