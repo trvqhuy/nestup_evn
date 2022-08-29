@@ -28,17 +28,9 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
 ## Cài đặt
 #### **Chú ý:** Sử dụng 1 trong những cách phía dưới để cài đặt công cụ vào HA.
 ### Cách 1: Cài đặt thông qua [HACS](https://hacs.xyz) (khuyến nghị).
-1. Thêm [**trvqhuy/nestup_evn**](https://github.com/trvqhuy/nestup_evn) repository vào HACS.
+1. Tải repository package về máy chủ HA.
 
-    > HACS > Integrations > `(Ba chấm phía trên bên phải)` > Custom repositories 
-    
-    ![download_01](screenshots/download_01.png) ![download_02](screenshots/download_02.png)
-    
-    > Nhập `trvqhuy/nestup_evn` vào `Repository` và chọn `Integration` ở `Category`
-    
      ![download_03](screenshots/download_03.png)
-
-2. Tải repository package về máy chủ HA.
 
     > HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > `Chọn phiên bản mới nhất` > Download this repository
     
@@ -78,7 +70,7 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
 
     **Yêu cầu**: Mã khách hàng của bạn phải thỏa những điều kiện sau:
 
-    - Chứa chính xác **13** kí tự.
+    - Chứa từ **11** tới **13** kí tự.
     - Bắt đầu bằng chữ **'P'**.
     
     ![setup_02](screenshots/setup_02_vn.png) 
