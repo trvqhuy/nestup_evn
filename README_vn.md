@@ -22,7 +22,7 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
 | EVNHCMC | Thành phố Hồ Chí Minh | ☑️ | ☑️ | [Link](https://cskh.evnhcmc.vn/lienhe)
 | EVNSPC | Các tỉnh miền Nam | ☑️ |   | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
 | EVNNPC | Các tỉnh miền Bắc | ☑️ |   | [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
-| EVNHANOI | Thành phố Hà Nội | ☑️ | ☑️ | [Link](https://evnhanoi.vn/infomation/lien-he)
+| EVNHANOI | Thủ đô Hà  | ☑️ | ☑️ | [Link](https://evnhanoi.vn/infomation/lien-he)
 | EVNCPC | Các tỉnh miền Trung | ☑️ | ☑️ | [Link](https://cskh.cpc.vn/lien-he)
     
 ## Cài đặt
@@ -105,7 +105,7 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
 
 - Anh **Pham Dinh Hai** và anh **Huynh Nhat**, vì đã tin tưởng, cung cấp thông tin tài khoản EVNHANOI và EVNCPC, nhờ vậy chủ repo có đủ điều kiện cần thiết để code hỗ trợ cho khu vực Hà Nội và miền Trung Việt Nam.  
 
-- Anh **Nguyen Huu Thanh**, vì những đóng góp cực kì nhiệt tình đối với khu vực EVNCPC miền Trung.
+- Anh **Hoang Tung V**, vì những đóng góp cực kì to lớn.
 
 > Không có những người kể trên, repo `nestup_evn` sẽ không ở đây, trở thành một dự án open-source tới cộng đồng HA Việt Nam.
 
