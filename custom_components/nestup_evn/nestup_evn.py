@@ -325,7 +325,7 @@ class EVNAPI:
             return {"status": state, "data": resp_json}
 
         last_day = parser.parse(
-            resp_json["data"]["tongSanLuong"]["ngayCuoiKy"]
+            resp_json["data"]["tongSanLuong"]["ngayCuoiKy"], dayfirst=True
         ) - timedelta(days=1)
 
         return {
@@ -645,16 +645,12 @@ def generate_datetime(monthly_start: int, offset=0):
         start_datetime = (
             f"{monthly_start_str}/{last_month_str}/{time_obj.strftime('%Y')}"
         )
-        end_datetime = (
-            f"{'{:0>2}'.format(current_day - 1 + offset)}/{time_obj.strftime('%m/%Y')}"
-        )
+        end_datetime = (time_obj - timedelta(days=1 - offset)).strftime("%d/%m/%Y")
 
         return start_datetime, end_datetime
 
     start_datetime = ""
-    end_datetime = (
-        f"{'{:0>2}'.format(current_day - 1 + offset)}/{time_obj.strftime('%m/%Y')}"
-    )
+    end_datetime = (time_obj - timedelta(days=1 - offset)).strftime("%d/%m/%Y")
 
     if current_day > monthly_start:
         start_datetime = f"{monthly_start_str}/{time_obj.strftime('%m/%Y')}"
