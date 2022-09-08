@@ -13,17 +13,19 @@ Công cụ hỗ trợ cài đặt và chỉnh sửa trực tiếp thông qua UI,
 ![ui_display](screenshots/ui_display.png)
 
 ## Lưu ý trước khi cài đặt
-Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận dữ liệu điện năng tiêu thụ từ máy chủ EVN, nhưng một số khác thì không.
+<s>Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận dữ liệu điện năng tiêu thụ từ máy chủ EVN, nhưng một số khác thì không.</s>
 
-**Chú ý**: Kiểm tra ở bảng phía dưới, nếu như khu vực của bạn cần tài khoản EVN, liên hệ với TTCSKH (Trung tâm Chăm sóc Khách Hàng) để xin thông tin đăng nhập (và tất nhiên, mã khách hàng):
+Hiện tại tất cả vùng miền đều **cần phải có tài khoản EVN**.
+
+**Chú ý**: Kiểm tra ở bảng phía dưới, liên hệ với TTCSKH (Trung tâm Chăm sóc Khách Hàng) để xin thông tin đăng nhập (và tất nhiên, mã khách hàng):
 
 | Chi nhánh EVN | Khu vực | Đã hỗ trợ | Cần tài khoản xác thực | TTCSKH |
 |:---:|:---:|:---:|:---:|:---:|
+| EVNHANOI | Thủ đô Hà Nội | ☑️ | ☑️ | [Link](https://evnhanoi.vn/infomation/lien-he)
 | EVNHCMC | Thành phố Hồ Chí Minh | ☑️ | ☑️ | [Link](https://cskh.evnhcmc.vn/lienhe)
-| EVNSPC | Các tỉnh miền Nam | ☑️ |   | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
-| EVNNPC | Các tỉnh miền Bắc | ☑️ |   | [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
-| EVNHANOI | Thủ đô Hà  | ☑️ | ☑️ | [Link](https://evnhanoi.vn/infomation/lien-he)
+| EVNNPC | Các tỉnh miền Bắc | ☑️ | ☑️ | [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
 | EVNCPC | Các tỉnh miền Trung | ☑️ | ☑️ | [Link](https://cskh.cpc.vn/lien-he)
+| EVNSPC | Các tỉnh miền Nam | ☑️ | ☑️ | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
     
 ## Cài đặt
 #### **Chú ý:** Sử dụng 1 trong những cách phía dưới để cài đặt công cụ vào HA.
@@ -97,7 +99,7 @@ Có một số vùng miền **cần** sử dụng tài khoản EVN để nhận 
     
 2. Chu kì cập nhật dữ liệu mới từ EVN:
 
-    ` 60 phút ` là chu kì mặc định giữa các lần cập nhật dữ liệu điện tiêu thụ từ EVN.
+    ` 6 tiếng ` là chu kì mặc định giữa các lần cập nhật dữ liệu điện tiêu thụ từ EVN.
 
 ## Dành cho dự án
 
