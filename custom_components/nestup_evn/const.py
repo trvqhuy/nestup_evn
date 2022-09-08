@@ -2,14 +2,14 @@
 
 from datetime import timedelta
 
-DEFAULT_SCAN_INTERVAL = timedelta(hours=1)
+DEFAULT_SCAN_INTERVAL = timedelta(hours=6)
 
 DOMAIN = "nestup_evn"
 
 CONF_DEVICE_NAME = "EVN Monitor"
 CONF_DEVICE_MODEL = "Vietnam EVN Monitor"
 CONF_DEVICE_MANUFACTURER = "Nestup Co."
-CONF_DEVICE_SW_VERSION = "1.2.8"
+CONF_DEVICE_SW_VERSION = "1.2.9"
 
 CONF_USERNAME = "username"
 CONF_PASSWORD = "password"

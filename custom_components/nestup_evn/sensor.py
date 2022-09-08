@@ -1,9 +1,12 @@
 """Setup and manage HomeAssistant Entities."""
 
+from datetime import timedelta
 import logging
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity
+from dateutil import parser
+
+from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
@@ -27,6 +30,7 @@ from .const import (
     CONF_USERNAME,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
+    ID_TO_DATE,
 )
 from .types import EVN_SENSORS, EVNSensorEntityDescription
 
@@ -60,16 +64,11 @@ class EVNDevice:
         self._name = f"{CONF_DEVICE_NAME}: {dataset[CONF_CUSTOMER_ID]}"
         self._coordinator: DataUpdateCoordinator = None
 
-        if CONF_USERNAME in dataset:
-            self._username = dataset[CONF_USERNAME]
-            self._password = dataset[CONF_PASSWORD]
-        else:
-            self._username = None
-            self._password = None
-
-        self._area_name = dataset[CONF_AREA]
-        self._customer_id = dataset[CONF_CUSTOMER_ID]
-        self._monthly_start = dataset[CONF_MONTHLY_START]
+        self._username = dataset.get(CONF_USERNAME)
+        self._password = dataset.get(CONF_PASSWORD)
+        self._area_name = dataset.get(CONF_AREA)
+        self._customer_id = dataset.get(CONF_CUSTOMER_ID)
+        self._monthly_start = dataset.get(CONF_MONTHLY_START)
 
         self._api = api
         self._data = {}
@@ -77,13 +76,12 @@ class EVNDevice:
     async def update(self) -> dict[str, Any]:
         """Update device data from EVN Endpoints."""
 
-        if self._area_name.get("auth_needed"):
-            login_state = await self._api.login(
-                self._area_name, self._username, self._password
-            )
+        login_state = await self._api.login(
+            self._area_name, self._username, self._password
+        )
 
-            if login_state != CONF_SUCCESS:
-                return
+        if login_state != CONF_SUCCESS:
+            return
 
         self._data = await self._api.request_update(
             self._area_name, self._customer_id, self._monthly_start
@@ -173,3 +171,13 @@ class EVNSensor(CoordinatorEntity, SensorEntity):
     def available(self) -> bool:
         """Return the availability of the sensor."""
         return self._device._data["status"] == CONF_SUCCESS
+
+    @property
+    def last_reset(self):
+        if self.entity_description.state_class == SensorStateClass.TOTAL:
+            last_day = parser.parse(
+                self._device._data[ID_TO_DATE], dayfirst=True
+            ) + timedelta(days=1)
+            return last_day
+
+        return None

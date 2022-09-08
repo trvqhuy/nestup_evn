@@ -41,7 +41,7 @@ class Area:
     evn_login_url: str
     evn_data_request_url: str
     supported: bool
-    auth_needed: bool
+    date_needed: bool
     pattern: ArrayType
 
 
@@ -90,17 +90,17 @@ VIETNAM_EVN_AREA = [
     Area(
         EVN_NAME.NPC,
         "Khu vực miền Bắc",
-        "(EVNNPC does not need this field)",
-        "https://meterindex.enterhub.asia/SLngay",
+        "https://billnpccc.enterhub.asia/login",
+        "https://billnpccc.enterhub.asia/dailyconsump",
         True,
-        False,
+        True,
         ["PA", "PH", "PM", "PN"],
     ),
     Area(
         EVN_NAME.SPC,
         "Khu vực miền Nam",
-        "(EVNSPC does not need this field)",
-        "https://www.cskh.evnspc.vn/TraCuu/TraCuuSanLuongDienTieuThuTrongNgay",
+        "https://api.cskh.evnspc.vn/api/user/authenticate",
+        "https://api.cskh.evnspc.vn/api/NghiepVu/LayThongTinBieuDoSanLuongTheoNgay",
         True,
         False,
         ["PB", "PK"],
@@ -131,7 +131,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
         name="Sản lượng tháng (tạm tính)",
         icon="mdi:flash-outline",
         native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
-        state_class=SensorStateClass.TOTAL_INCREASING,
+        state_class=SensorStateClass.TOTAL,
         device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: data[ID_ECON_PER_MONTH],
     ),
@@ -148,7 +148,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
         name="Tiền điện tháng (tạm tính)",
         icon="mdi:cash-multiple",
         native_unit_of_measurement="VNĐ",
-        state_class=SensorStateClass.MEASUREMENT,
+        state_class=SensorStateClass.TOTAL,
         value_fn=lambda data: data[ID_ECOST_PER_MONTH],
     ),
     EVNSensorEntityDescription(

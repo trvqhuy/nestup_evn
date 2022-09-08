@@ -72,10 +72,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._user_data.update(user_input)
             self._api = nestup_evn.EVNAPI(self.hass, True)
 
-            verify_account = CONF_SUCCESS
-
-            if self._user_data[CONF_AREA].get("auth_needed"):
-                verify_account = await self._try_auth()
+            verify_account = await self._try_auth()
 
             if verify_account is not CONF_SUCCESS:
                 self._errors["base"] = verify_account
@@ -95,13 +92,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         data_schema = {}
 
-        if self._user_data[CONF_AREA].get("auth_needed"):
-            data_schema = AUTH_FIELD(self._user_data)
+        data_schema = AUTH_FIELD(self._user_data)
 
         if bool(self._errors):
             data_schema |= CUSTOMER_ID_FIELD(self._user_data)
 
-        data_schema |= DATE_START_FIELD
+        if self._user_data[CONF_AREA].get("date_needed"):
+            data_schema |= DATE_START_FIELD
 
         return self.async_show_form(
             step_id="fulfill_data",

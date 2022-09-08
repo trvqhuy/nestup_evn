@@ -1,5 +1,6 @@
 """Setup and manage the EVN API."""
 
+import base64
 from dataclasses import asdict
 from datetime import datetime, timedelta
 import json
@@ -7,8 +8,8 @@ import logging
 import os
 import ssl
 from typing import Any
+import uuid
 
-from bs4 import BeautifulSoup
 from dateutil import parser
 
 from homeassistant.core import HomeAssistant
@@ -57,9 +58,6 @@ class EVNAPI:
 
         self._evn_area = evn_area
 
-        if not evn_area.get("auth_needed"):
-            return CONF_SUCCESS
-
         if (username is None) or (password is None):
             return CONF_ERR_UNKNOWN
 
@@ -72,10 +70,16 @@ class EVNAPI:
         elif evn_area.get("name") == EVN_NAME.CPC:
             return await self.login_evncpc(username, password)
 
+        elif evn_area.get("name") == EVN_NAME.SPC:
+            return await self.login_evnspc(username, password)
+
+        elif evn_area.get("name") == EVN_NAME.NPC:
+            return await self.login_evnnpc(username, password)
+
         return CONF_ERR_UNKNOWN
 
     async def request_update(
-        self, evn_area: Area, customer_id, monthly_start
+        self, evn_area: Area, customer_id, monthly_start=None
     ) -> dict[str, Any]:
         """Request new update from EVN Server, corresponding with the last session"""
 
@@ -90,12 +94,10 @@ class EVNAPI:
             )
 
         elif evn_area.get("name") == EVN_NAME.SPC:
-            from_date, to_date = generate_datetime(monthly_start, offset=1)
-            fetch_data = await self.request_update_evnspc(
-                customer_id, from_date, to_date
-            )
+            fetch_data = await self.request_update_evnspc(customer_id)
 
-        from_date, to_date = generate_datetime(monthly_start)
+        if monthly_start is not None:
+            from_date, to_date = generate_datetime(monthly_start)
 
         if evn_area.get("name") == EVN_NAME.HCMC:
             fetch_data = await self.request_update_evnhcmc(
@@ -128,6 +130,119 @@ class EVNAPI:
                 fetch_data[ID_TO_DATE] = to_date
 
         return fetch_data
+
+    async def login_evnnpc(self, username, password) -> str:
+        """Create EVN login session corresponding with EVNNPC Endpoint"""
+
+        payload = {"username": username, "password": password}
+
+        basic_auth = (
+            "A21FA5C-34BE-42D7-AE70-8BF03C1EE540:026A64EF-2A91-4973-AA20-6E8A2B66D560"
+        )
+
+        auth_header = base64.b64encode(basic_auth.encode()).decode()
+
+        headers = {
+            "User-Agent": "NPCApp/1 CFNetwork/1240.0.4 Darwin/20.6.0",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Authorization": f"Basic {auth_header}",
+        }
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+
+        resp = await self._session.post(
+            url=self._evn_area.get("evn_login_url"),
+            data=payload,
+            headers=headers,
+            ssl=ssl_context,
+        )
+
+        if resp.status != 200:
+            if resp.status == 400:
+                _LOGGER.error(
+                    "Cannot login into EVN Server: Invalid EVN Authentication"
+                )
+                return CONF_ERR_INVALID_AUTH
+
+            _LOGGER.error(
+                f"Cannot connect to EVN Server while loging in: status code {resp.status}"
+            )
+            return CONF_ERR_CANNOT_CONNECT
+
+        try:
+            res = await resp.text()
+            resp_json = json.loads(res)
+
+        except Exception as error:
+            _LOGGER.error(
+                f"Unable to fetch data from EVN Server while loging in: {error}"
+            )
+            return CONF_ERR_UNKNOWN
+
+        if not (
+            "message" in resp_json and resp_json["message"] == "Login successfully."
+        ):
+            return CONF_ERR_INVALID_AUTH
+
+        self._evn_area["access_token"] = resp_json["access_token"]
+        return CONF_SUCCESS
+
+    async def login_evnspc(self, username, password) -> str:
+        """Create EVN login session corresponding with EVNSPC Endpoint"""
+
+        payload = {
+            "strUsername": username,
+            "strPassword": password,
+            "strDeviceID": str(uuid.uuid4),
+        }
+
+        headers = {
+            "User-Agent": "evnapp/59 CFNetwork/1240.0.4 Darwin/20.6.0",
+            "Accept-Language": "vi-vn",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Content-Type": "application/json; charset=utf-8",
+            "Authorization": "Basic Q1NLSF9Td2FnZ2VyOjFxMnczZSo=",
+        }
+
+        resp = await self._session.post(
+            url=self._evn_area.get("evn_login_url"),
+            data=json.dumps(payload),
+            headers=headers,
+            ssl=False,
+        )
+
+        if resp.status != 200:
+            if resp.status == 401 or resp.status == 400:
+                _LOGGER.error(
+                    "Cannot login into EVN Server: Invalid EVN Authentication"
+                )
+                return CONF_ERR_INVALID_AUTH
+
+            _LOGGER.error(
+                f"Cannot connect to EVN Server while loging in: status code {resp.status}"
+            )
+            return CONF_ERR_CANNOT_CONNECT
+
+        try:
+            res = await resp.text()
+            resp_json = json.loads(res)
+
+        except Exception as error:
+            _LOGGER.error(
+                f"Unable to fetch data from EVN Server while loging in: {error}"
+            )
+            return CONF_ERR_UNKNOWN
+
+        if not ("maKH" in resp_json and "token" in resp_json):
+            return CONF_ERR_UNKNOWN
+
+        if resp_json["maKH"] == "":
+            return CONF_ERR_INVALID_AUTH
+
+        self._evn_area["access_token"] = resp_json["token"]
+        return CONF_SUCCESS
 
     async def login_evncpc(self, username, password) -> str:
         """Create EVN login session corresponding with EVNCPC Endpoint"""
@@ -299,6 +414,7 @@ class EVNAPI:
         try:
             res = await resp.text()
             resp_json = json.loads(res)
+
             state = CONF_ERR_UNKNOWN if resp_json["isError"] else CONF_SUCCESS
 
         except Exception as error:
@@ -357,10 +473,9 @@ class EVNAPI:
 
         try:
             res = await resp.text()
-
             resp_json = json.loads(res)
 
-            state = CONF_SUCCESS if bool(resp_json) else CONF_SUCCESS
+            state = CONF_SUCCESS if bool(resp_json) else CONF_ERR_UNKNOWN
 
         except Exception as error:
             _LOGGER.error(
@@ -429,26 +544,29 @@ class EVNAPI:
             ID_ECON_PER_DAY: float(resp_json["data"]["sanluong_tungngay"][-1]["Tong"]),
             ID_ECON_PER_MONTH: float(resp_json["data"]["sanluong_tong"]["Tong"]),
             ID_TO_DATE: resp_json["data"]["sanluong_tungngay"][-1]["ngayFull"],
+            ID_FROM_DATE: resp_json["data"]["sanluong_tungngay"][0]["ngayFull"],
         }
 
-    async def request_update_evnspc(self, customer_id, start_datetime, end_datetime):
+    async def request_update_evnspc(self, customer_id, last_index="001"):
         """Request new update from EVNSPC Server"""
 
-        ssl_context = ssl.create_default_context()
-        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+        headers = {
+            "User-Agent": "evnapp/59 CFNetwork/1240.0.4 Darwin/20.6.0",
+            "Authorization": f"Bearer {self._evn_area.get('access_token')}",
+        }
 
-        resp = await self._session.post(
+        resp = await self._session.get(
             url=self._evn_area.get("evn_data_request_url"),
-            data={
-                "MaKhachHangChiSoChot": customer_id,
-                "TuNgayChiSoChot": start_datetime.replace("/", "-"),
-                "DenNgayChiSoChot": end_datetime.replace("/", "-"),
-                "check": "1",
-            },
+            headers=headers,
+            params={"strMaDiemDo": f"{customer_id}{last_index}"},
             ssl=False,
         )
 
         if resp.status != 200:
+
+            if resp.status == 405:
+                return {"status": CONF_ERR_NOT_SUPPORTED, "data": resp.status}
+
             _LOGGER.error(
                 f"Cannot connect to EVN Server while requesting new data: status code {resp.status}"
             )
@@ -456,6 +574,12 @@ class EVNAPI:
 
         try:
             res = await resp.text()
+            resp_json = json.loads(res)
+
+            state = CONF_SUCCESS if bool(resp_json) else CONF_ERR_UNKNOWN
+
+            to_date = parser.parse(resp_json[-1]["strTime"], dayfirst=True)
+            from_date = parser.parse(resp_json[0]["strTime"], dayfirst=True)
 
         except Exception as error:
             _LOGGER.error(
@@ -463,73 +587,48 @@ class EVNAPI:
             )
             return {"status": CONF_ERR_UNKNOWN, "data": error}
 
-        resp_json = {}
-
-        try:
-            soup = BeautifulSoup(res, "html.parser")
-            json_data = {}
-
-            for index, data in enumerate(soup.find_all("td")):
-                item = data.text
-
-                if index == 1:
-                    resp_json = {"total": float(item), "data": []}
-                elif index > 1:
-                    if not ((index - 1) % 3):
-                        json_data["value"] = float(item)
-                        resp_json["data"].append(json_data)
-                    elif not (index % 3):
-                        json_data = {}
-                        json_data["date"] = item
-
-        except Exception as error:
+        if state != CONF_SUCCESS:
             _LOGGER.error(
-                f"Unable to fetch data from EVN Server while requesting new data - {error}"
-            )
-            return {"status": CONF_ERR_UNKNOWN, "data": error}
-
-        if resp_json == {}:
-
-            error = CONF_ERR_INVALID_ID
-
-            table = soup.findAll("div", attrs={"class": "box-information"})
-            for x in table:
-                if (
-                    x.find("p").text
-                    == "Quý khách hàng hiện không có thông tin sản lượng điện tiêu thụ trong ngày."
-                ):
-                    error = CONF_ERR_NO_MONITOR
-
-            _LOGGER.error(
-                "Cannot request new data from EVN Server: Invalid EVN Customer ID"
+                f"Cannot request new data from EVN Server for customer ID: {customer_id}\n{resp_json}"
             )
 
-            return {"status": error, "data": soup}
-
-        data_list = list(resp_json["data"])
-        last_day = parser.parse(data_list[-1]["date"]) - timedelta(days=1)
+            return {"status": state, "data": resp_json}
 
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: float(data_list[-1]["value"]),
-            ID_ECON_PER_MONTH: float(resp_json["total"]),
-            ID_TO_DATE: last_day.strftime("%d/%m/%Y"),
+            ID_ECON_PER_DAY: float(resp_json[-1]["dSanLuongBT"]),
+            ID_ECON_PER_MONTH: float(
+                resp_json[-1]["dGiaoTong"] - resp_json[0]["dGiaoTong"]
+            ),
+            ID_TO_DATE: to_date.strftime("%d/%m/%Y"),
+            ID_FROM_DATE: from_date.strftime("%d/%m/%Y"),
         }
 
-    async def request_update_evnnpc(self, customer_id, start_datetime, end_datetime):
+    async def request_update_evnnpc(
+        self, customer_id, start_datetime, end_datetime, last_index="001"
+    ):
         """Request new update from EVNNPC Server"""
+
+        payload = {
+            "ma": f"{customer_id}{last_index}",
+            "start_intime": start_datetime.replace("/", "-"),
+            "stop_intime": end_datetime.replace("/", "-"),
+        }
+
+        headers = {
+            "User-Agent": "NPCApp/1 CFNetwork/1240.0.4 Darwin/20.6.0",
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self._evn_area.get('access_token')}",
+        }
 
         try:
             ssl_context = ssl.create_default_context()
             ssl_context.set_ciphers("ALL:@SECLEVEL=1")
 
-            resp = await self._session.get(
+            resp = await self._session.post(
                 url=self._evn_area.get("evn_data_request_url"),
-                params={
-                    "MA_DDO": f"{customer_id}001",
-                    "STARTTIME": start_datetime.replace("/", "-"),
-                    "STOPTIME": end_datetime.replace("/", "-"),
-                },
+                data=json.dumps(payload),
+                headers=headers,
                 ssl=ssl_context,
             )
 
@@ -549,12 +648,6 @@ class EVNAPI:
             res = await resp.text()
             resp_json = json.loads(res)
 
-            info_list = []
-
-            for each_entity in resp_json:
-                if "Sản lượng điện tiêu thụ của khách hàng" in each_entity["GHI_CHU"]:
-                    info_list.append(each_entity)
-
         except Exception as error:
             _LOGGER.error(
                 f"Cannot request new data from EVN Server: Invalid EVN Customer ID\n{error}"
@@ -565,35 +658,48 @@ class EVNAPI:
                 "data": "Cannot request e-consumption data",
             }
 
-        last_day = parser.parse(info_list[0]["THOI_GIAN_BAT_DAU"])
+        valid_info = []
 
-        if info_list == []:
+        for each_entity in resp_json:
+            if (
+                each_entity.get("GHI_CHU") == "Sản lượng điện tiêu thụ của khách hàng"
+                and each_entity.get("LOAI_CHI_SO") == "P"
+            ):
+                valid_info.append(each_entity)
+
+        if valid_info == []:
             return {
                 "status": CONF_ERR_NO_MONITOR,
                 "data": str(resp_json[0]),
             }
 
-        elif len(info_list) == 1:
+        to_date = parser.parse(valid_info[0]["THOI_GIAN_BAT_DAU"])
+
+        if len(valid_info) == 1:
             return {
                 "status": CONF_SUCCESS,
-                ID_ECON_PER_DAY: float(info_list[0]["SAN_LUONG"]),
+                ID_ECON_PER_DAY: float(valid_info[0]["SAN_LUONG"]),
                 ID_ECON_PER_MONTH: round(
-                    float(info_list[0]["CHI_SO_KET_THUC"])
-                    - float(info_list[0]["CHI_SO_BAT_DAU"]),
+                    float(valid_info[0]["CHI_SO_KET_THUC"])
+                    - float(valid_info[0]["CHI_SO_BAT_DAU"]),
                     2,
                 ),
-                ID_TO_DATE: last_day.strftime("%d/%m/%Y"),
+                ID_TO_DATE: to_date.strftime("%d/%m/%Y"),
+                ID_FROM_DATE: to_date.strftime("%d/%m/%Y"),
             }
+
+        from_date = parser.parse(valid_info[-1]["THOI_GIAN_BAT_DAU"])
 
         return {
             "status": CONF_SUCCESS,
-            ID_ECON_PER_DAY: float(info_list[0]["SAN_LUONG"]),
+            ID_ECON_PER_DAY: float(valid_info[0]["SAN_LUONG"]),
             ID_ECON_PER_MONTH: round(
-                float(info_list[0]["CHI_SO_KET_THUC"])
-                - float(info_list[-1]["CHI_SO_BAT_DAU"]),
+                float(valid_info[0]["CHI_SO_KET_THUC"])
+                - float(valid_info[-1]["CHI_SO_BAT_DAU"]),
                 2,
             ),
-            ID_TO_DATE: last_day.strftime("%d/%m/%Y"),
+            ID_TO_DATE: to_date.strftime("%d/%m/%Y"),
+            ID_FROM_DATE: from_date.strftime("%d/%m/%Y"),
         }
 
 
@@ -615,13 +721,8 @@ def get_evn_info(evn_customer_id: str):
                         if evn_id in evn_customer_id:
                             evn_branch = evn_branches_list[evn_id]
 
-                status = CONF_SUCCESS
-
-                if not VIETNAM_EVN_AREA[index].supported:
-                    status = CONF_ERR_NOT_SUPPORTED
-
                 return {
-                    "status": status,
+                    "status": CONF_SUCCESS,
                     "customer_id": evn_customer_id,
                     "evn_area": asdict(each_area),
                     "evn_name": each_area.name,
@@ -629,7 +730,7 @@ def get_evn_info(evn_customer_id: str):
                     "evn_branch": evn_branch,
                 }
 
-    return {"status": CONF_ERR_UNKNOWN}
+    return {"status": CONF_ERR_NOT_SUPPORTED}
 
 
 def generate_datetime(monthly_start: int, offset=0):
