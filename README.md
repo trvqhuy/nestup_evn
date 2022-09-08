@@ -6,7 +6,7 @@
 
 #### English | [Tiếng Việt](https://github.com/trvqhuy/ha-evn/blob/main/README_vn.md)
 
-This component utilized the simple yet powerful **HTTP(S)** protocol to periodically fetch the latest e-consumption data from [EVN Endpoint](https://www.evn.com.vn) into [Home Assistant](https://www.home-assistant.io) with **AIOHTTP** module (and a brilliant assist from **BeautifulSoup** for scaping useful data). 
+This component utilized the simple yet powerful **HTTP(S)** protocol to periodically fetch the latest e-consumption data from [EVN Endpoint](https://www.evn.com.vn) into [Home Assistant](https://www.home-assistant.io) with **AIOHTTP** module <s>(and a brilliant assist from **BeautifulSoup** for scaping useful data)</s>. 
 
 Hence, it supports installation through UI, and can easily integrate monitoring devices into HA without configuring yaml.
 
@@ -27,11 +27,11 @@ A qualified EVN account will consist of:
 
 Starting from the v1.2.5 version, the component has successfully provided support for all of the areas in Vietnam.
 
-| EVN Branch | Vietnam Area | Is Supported  | Is EVN Account Required | Support Center |
+| EVN Branch | Vietnam Area | Supported  | EVN Account Required | Support Center |
 |:---:|:---:|:---:|:---:|:---:|
 | EVNHCMC | Ho Chi Minh City | ☑️ | ☑️ | [Link](https://cskh.evnhcmc.vn/lienhe)
-| EVNSPC | Southern Vietnam | ☑️ |   | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
-| EVNNPC | Northern Vietnam | ☑️ |   | [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
+| EVNSPC | Southern Vietnam | ☑️ | ☑️ | [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
+| EVNNPC | Northern Vietnam | ☑️ | ☑️ | [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
 | EVNHANOI | Ha Noi Capital | ☑️ | ☑️ | [Link](https://evnhanoi.vn/infomation/lien-he)
 | EVNCPC | Central Vietnam | ☑️ | ☑️ | [Link](https://cskh.cpc.vn/lien-he)
     
