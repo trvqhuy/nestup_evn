@@ -14,8 +14,9 @@ Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** 
 3. Hỗ trợ cho **tất cả** chi nhánh EVN toàn quốc (bao gồm 5 tổng công ty và hơn 400 chi nhánh lớn nhỏ).
 4. **Tự động** xác định máy chủ EVN.
 5. Tương thích với tất cả platform HA: Core, Supervisors, Hass OS.
-
-![ui_display](screenshots/ui_display.png)
+<p align="center">
+<img src="screenshots/ui_display.png" height="400"> <img src="screenshots/device_info.png" height="400">
+</p>
 
 ## Lưu ý trước khi cài đặt
 ### 1. Phiên bản Home Assistant: tối thiểu 2022.7.0
@@ -49,15 +50,15 @@ Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài 
 | EVNNPC | Các tỉnh miền Bắc | ☑️ | [Link](https://cskh.npc.com.vn/home/AccountNPC)| [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
 | EVNCPC | Các tỉnh miền Trung | ☑️ | [Link](https://cskh.cpc.vn/dang-nhap)| [Link](https://cskh.cpc.vn/lien-he)
 | EVNSPC | Các tỉnh miền Nam | ☑️ | [Link](https://www.cskh.evnspc.vn/TaiKhoan/DangNhap)| [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
-    
+
 ## Cài đặt
 #### **Chú ý:** Sử dụng 1 trong những cách phía dưới để cài đặt công cụ vào HA.
 ### Cách 1: Cài đặt thông qua [HACS](https://hacs.xyz) (khuyến nghị).
 1. Tải repository package về máy chủ HA.
 
-     ![download_03](screenshots/download_03.png)
+<img src="screenshots/download_03.png" width="400">
 
-    > HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > `Chọn phiên bản mới nhất` > Download this repository
+> HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > `Chọn phiên bản mới nhất` > Download this repository
     
 3. Khởi động lại HomeAssistant.
 4. Cài đặt thành công, tiếp theo đến bước [Config](https://github.com/trvqhuy/nestup_evn/blob/main/README_vn.md#thi%E1%BA%BFt-l%E1%BA%ADp-v%C3%A0-ch%E1%BB%89nh-s%E1%BB%ADa) để hoàn thành.
@@ -89,8 +90,7 @@ Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài 
 #### 1. Tìm công cụ `EVN Data Fetcher` trong những công cụ đã tải về.
 > Settings > Devices and Services > Integrations > Add Integrations > Tìm `EVN Data Fetcher`
 
-![setup_01](screenshots/setup_01_vn.png)
-    
+<img src="screenshots/setup_01_vn.png" width="400">
 
 #### 2. Điền `Mã khách hàng`.
 
@@ -99,31 +99,33 @@ Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài 
 - Chứa từ **11** tới **13** kí tự.
 - Bắt đầu bằng chữ **'P'**.
 
-![setup_02](screenshots/setup_02_vn.png) 
-    
+<img src="screenshots/setup_02_vn.png" width="400">
+
 
 #### 3. Điền `Tài khoản EVN` và chọn `Ngày bắt đầu hóa đơn`.
 **Chú ý**: **ngày bắt đầu hóa đơn** là ngày đầu tiên trong hóa đơn điện hàng tháng (xem hóa đơn các kì trước để chắc chắn). 
 
-![setup_03](screenshots/setup_03_vn.png)
-    
+<img src="screenshots/setup_03_vn.png" width="400">
 
 #### 4. Hoàn thành, bây giờ bạn có thể thấy thiết bị theo dõi của mình ở phần Devices.
-    
-![device_info](screenshots/device_info_vn.png)
-    
+
+<img src="screenshots/device_info.png" width="400">
+
 ## Home Assistant: Cách tạo Automation thông báo điện năng tiêu thụ mỗi ngày
 
-![notify_hass](screenshots/notify_hass.jpg)
+<img src="screenshots/notify_hass.jpg" width="500">
 
 **Lưu ý**: thay thế tên thiết bị của bạn (unique_id) vào **5** phần `ten_device_cua_ban` ở phía dưới.
 
 ```yaml
 alias: Thông báo điện năng tiêu thụ mỗi ngày
+mode: single
+
 trigger:
 # Tùy chỉnh thời gian cố định mỗi ngày để thông báo (ví dụ 8:00 sáng mỗi ngày)
   - platform: time
     at: "08:00:00"
+
 condition:
   - condition: template
     value_template: >-
@@ -150,7 +152,6 @@ action:
         kWh{{'\n'}} - Thành tiền:
         {{'{0:_.0f}'.format(states('sensor.ten_device_cua_ban_tien_dien_ngay_moi_nhat')|int).replace('_',
         '.')}} VNĐ
-mode: single
 ```
 
 ### Chỉnh sửa thông số
