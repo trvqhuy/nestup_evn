@@ -15,7 +15,7 @@ Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** 
 4. **Tự động** xác định máy chủ EVN.
 5. Tương thích với tất cả platform HA: Core, Supervisors, Hass OS.
 <p align="center">
-<img src="screenshots/ui_display.png" height="400"> <img src="screenshots/device_info.png" height="400">
+<img src="screenshots/ui_display.png" height="300"> <img src="screenshots/device_info.png" height="300">
 </p>
 
 ## Lưu ý trước khi cài đặt
