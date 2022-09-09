@@ -4,7 +4,7 @@
 
 ## Công cụ theo dõi điện năng tiêu thụ từ EVN Việt Nam dành cho HomeAssistant
 
-#### [English](https://github.com/trvqhuy/ha-evn/blob/main/README.md) | Tiếng Việt
+#### [English](https://github.com/trvqhuy/ha-evn/blob/main/README_en.md) | Tiếng Việt
 
 Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** thông qua những giao thức **HTTP(S)** cơ bản, công cụ cho phép theo dõi dữ liệu điện năng tiêu thụ từ [EVN](https://www.evn.com.vn) trực tiếp trên UI [Home Assistant](https://www.home-assistant.io), hiện tại đã hỗ trợ cho **tất cả vùng miền** tại Việt Nam cùng với chi nhánh EVN tương ứng (xem tại [danh sách phía dưới](https://github.com/trvqhuy/nestup_evn/edit/main/README_vn.md#l%C6%B0u-%C3%BD-tr%C6%B0%E1%BB%9Bc-khi-c%C3%A0i-%C4%91%E1%BA%B7t)).
 
