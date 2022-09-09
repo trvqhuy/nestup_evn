@@ -10,14 +10,16 @@ Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** 
 
 ### Các tính năng cơ bản
 1. Thiết lập và theo dõi **nhiều mã khách hàng** cùng một lúc, trên cùng **một máy chủ HA**.
-2. Cài đặt và chỉnh sửa **trực tiếp bằng UI**, quản lí các thông số điện năng thông qua các thiết bị theo dõi tập trung.
+2. Cài đặt và chỉnh sửa **trực tiếp bằng UI (thông qua HACS)**, quản lí các thông số điện năng thông qua các thiết bị theo dõi tập trung.
 3. Hỗ trợ cho **tất cả** chi nhánh EVN toàn quốc (bao gồm 5 tổng công ty và hơn 400 chi nhánh lớn nhỏ).
 4. **Tự động** xác định máy chủ EVN.
+5. Tương thích với tất cả platform HA: Core, Supervisors, Hass OS.
 
 ![ui_display](screenshots/ui_display.png)
 
 ## Lưu ý trước khi cài đặt
-### 1. Công tơ điện EVN
+### 1. Phiên bản Home Assistant: tối thiểu 2022.7.0
+### 2. Công tơ điện EVN
 Công cụ chỉ hỗ trợ cho loại công tơ **điện tử đo xa ghi theo ngày**:
 - Không phải tất cả công tơ **điện tử** đều hỗ trợ đọc chỉ số từ xa **(đo xa)**.
 - Không phải tất cả công tơ **điện tử đo xa** đều hỗ trợ **ghi theo ngày**.
@@ -26,7 +28,7 @@ Công cụ chỉ hỗ trợ cho loại công tơ **điện tử đo xa ghi theo 
     
     > Nếu như bạn có thể theo dõi được **sản lượng theo ngày** trên website hoặc app chính thức của EVN, thì công tơ nhà bạn thích hợp để sử dụng công cụ này.
 
-### 2. Mã khách hàng và tài khoản EVN
+### 3. Mã khách hàng và tài khoản EVN
 Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài khoản EVN** tương ứng với **mã khách hàng** để sử dụng công cụ.
 
 **Tài khoản EVN** hợp lệ sẽ bao gồm:
