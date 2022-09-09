@@ -62,7 +62,7 @@ Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài 
 3. Khởi động lại HomeAssistant.
 4. Cài đặt thành công, tiếp theo đến bước [Config](https://github.com/trvqhuy/nestup_evn/blob/main/README_vn.md#thi%E1%BA%BFt-l%E1%BA%ADp-v%C3%A0-ch%E1%BB%89nh-s%E1%BB%ADa) để hoàn thành.
 
-### Method 2: Cài đặt thủ công thông qua Samba / SFTP
+### Cách 2: Cài đặt thủ công thông qua Samba / SFTP
 1. Tải phiên bản mới nhất của công cụ thông qua [Github](https://github.com/trvqhuy/nestup_evn.git).
 
 2. Giải nén thư mục `custom_components/nestup_evn` vào thư mục `custom_components` trong HomeAssistant của bạn.
