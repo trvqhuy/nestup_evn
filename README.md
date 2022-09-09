@@ -113,6 +113,11 @@ Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài 
 ![device_info](screenshots/device_info_vn.png)
     
 ## Home Assistant: Cách tạo Automation thông báo điện năng tiêu thụ mỗi ngày
+
+![notify_hass](screenshots/notify_hass.jpg)
+
+**Lưu ý**: thay thế tên thiết bị của bạn (unique_id) vào **5** phần `ten_device_cua_ban` ở phía dưới.
+
 ```yaml
 alias: Thông báo điện năng tiêu thụ mỗi ngày
 trigger:
@@ -124,26 +129,26 @@ condition:
     value_template: >-
 # Thông thường dữ liệu điện tiêu thụ mới nhất sẽ là của ngày trước đó, 
 #   ví dụ hôm nay ngày 09/09/2022 thì dữ liệu mới nhất là của ngày 08/09/2022
-        {{ states('sensor.evn_monitor_pb13010044721_ngay_moi_nhat') == (now() - timedelta(days=1)).strftime('%d/%m/%Y')}}
+        {{ states('sensor.ten_device_cua_ban_ngay_moi_nhat') == (now() - timedelta(days=1)).strftime('%d/%m/%Y')}}
 
 # Nếu như ở khu vực của bạn, dữ liệu điện tiêu thụ từ EVN luôn cập nhật trễ hơn, 
 #   xin hãy thay bằng template phía dưới, với X là số ngày trễ hơn:
 # Ví dụ hôm nay là ngày 09/09/2022, dữ liệu mới nhất là của ngày 06/09/2022, 
 #   luôn trễ hơn 3 ngày, thì X = 3.
-#       {{ states('sensor.evn_monitor_pb13010044721_ngay_moi_nhat') == (now() - timedelta(days=X)).strftime('%d/%m/%Y')}}
+#       {{ states('sensor.ten_device_cua_ban_ngay_moi_nhat') == (now() - timedelta(days=X)).strftime('%d/%m/%Y')}}
 
 action:
 # Tùy chình bằng service notify của bạn
   - service: notify.notify
     data:
-      title: Thông báo điện năng tiêu thụ mới
+      title: Điện tiêu thụ @ Saigon Home
       message: >
         Dữ liệu ngày
-        {{states('sensor.evn_monitor_(ma_kh_cua_ban)_ngay_moi_nhat')}}:{{'\n'}} -
+        {{states('sensor.ten_device_cua_ban_ngay_moi_nhat')}}:{{'\n'}} -
         Sản lượng:
-        {{states('sensor.evn_monitor_(ma_kh_cua_ban)_san_luong_ngay_moi_nhat')}}
+        {{states('sensor.ten_device_cua_ban_san_luong_ngay_moi_nhat')}}
         kWh{{'\n'}} - Thành tiền:
-        {{'{0:_.0f}'.format(states('sensor.evn_monitor_(ma_kh_cua_ban)_tien_dien_ngay_moi_nhat')|int).replace('_',
+        {{'{0:_.0f}'.format(states('sensor.ten_device_cua_ban_tien_dien_ngay_moi_nhat')|int).replace('_',
         '.')}} VNĐ
 mode: single
 ```
