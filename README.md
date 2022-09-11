@@ -6,7 +6,7 @@
 
 #### [English](https://github.com/trvqhuy/ha-evn/blob/main/README_en.md) | Tiếng Việt
 
-Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** thông qua những giao thức **HTTP(S)** cơ bản, công cụ cho phép theo dõi dữ liệu điện năng tiêu thụ từ [EVN](https://www.evn.com.vn) trực tiếp trên UI [Home Assistant](https://www.home-assistant.io), hiện tại đã hỗ trợ cho **tất cả vùng miền** tại Việt Nam cùng với chi nhánh EVN tương ứng (xem tại [danh sách phía dưới](https://github.com/trvqhuy/nestup_evn/edit/main/README_vn.md#l%C6%B0u-%C3%BD-tr%C6%B0%E1%BB%9Bc-khi-c%C3%A0i-%C4%91%E1%BA%B7t)).
+Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** thông qua những giao thức **HTTP(S)** cơ bản, công cụ cho phép theo dõi dữ liệu điện năng tiêu thụ từ [EVN](https://www.evn.com.vn) trực tiếp trên UI [Home Assistant](https://www.home-assistant.io), hiện tại đã hỗ trợ cho **tất cả vùng miền** tại Việt Nam cùng với chi nhánh EVN tương ứng (xem tại [danh sách phía dưới](https://github.com/trvqhuy/nestup_evn#3-m%C3%A3-kh%C3%A1ch-h%C3%A0ng-v%C3%A0-t%C3%A0i-kho%E1%BA%A3n-evn)).
 
 ### Các tính năng cơ bản
 1. Thiết lập và theo dõi **nhiều mã khách hàng** cùng một lúc, trên cùng **một máy chủ HA**.
@@ -25,7 +25,7 @@ Công cụ chỉ hỗ trợ cho loại công tơ **điện tử đo xa ghi theo 
 - Không phải tất cả công tơ **điện tử** đều hỗ trợ đọc chỉ số từ xa **(đo xa)**.
 - Không phải tất cả công tơ **điện tử đo xa** đều hỗ trợ **ghi theo ngày**.
 
-    > Để đảm bảo công tơ nhà bạn đủ điều kiện để sử dụng công cụ, xin hãy truy cập vào link [Đăng nhập](https://github.com/trvqhuy/nestup_evn/edit/main/README_vn.md#l%C6%B0u-%C3%BD-tr%C6%B0%E1%BB%9Bc-khi-c%C3%A0i-%C4%91%E1%BA%B7t) phía dưới (xin chọn tương ứng với khu vực EVN của bạn).
+    > Để đảm bảo công tơ nhà bạn đủ điều kiện để sử dụng công cụ, xin hãy truy cập vào link [Đăng nhập](https://github.com/trvqhuy/nestup_evn#3-m%C3%A3-kh%C3%A1ch-h%C3%A0ng-v%C3%A0-t%C3%A0i-kho%E1%BA%A3n-evn) phía dưới (xin chọn tương ứng với khu vực EVN của bạn).
     
     > Nếu như bạn có thể theo dõi được **sản lượng theo ngày** trên website hoặc app chính thức của EVN, thì công tơ nhà bạn thích hợp để sử dụng công cụ này.
 
@@ -61,7 +61,7 @@ Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài 
 > HACS > Integrations > ➕ Explore & download repositories  > `EVN Data Fetcher` > `Chọn phiên bản mới nhất` > Download this repository
     
 3. Khởi động lại HomeAssistant.
-4. Cài đặt thành công, tiếp theo đến bước [Config](https://github.com/trvqhuy/nestup_evn/blob/main/README_vn.md#thi%E1%BA%BFt-l%E1%BA%ADp-v%C3%A0-ch%E1%BB%89nh-s%E1%BB%ADa) để hoàn thành.
+4. Cài đặt thành công, tiếp theo đến bước [Config](https://github.com/trvqhuy/nestup_evn#thi%E1%BA%BFt-l%E1%BA%ADp-v%C3%A0-ch%E1%BB%89nh-s%E1%BB%ADa) để hoàn thành.
 
 ### Cách 2: Cài đặt thủ công thông qua Samba / SFTP
 1. Tải phiên bản mới nhất của công cụ thông qua [Github](https://github.com/trvqhuy/nestup_evn.git).
