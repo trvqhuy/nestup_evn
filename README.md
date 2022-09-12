@@ -14,8 +14,22 @@ Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** 
 3. Hỗ trợ cho **tất cả** chi nhánh EVN toàn quốc (bao gồm 5 tổng công ty và hơn 400 chi nhánh lớn nhỏ).
 4. **Tự động** xác định máy chủ EVN.
 5. Tương thích với tất cả platform HA: Core, Supervisors, Hass OS.
+
 <p align="center">
 <img src="screenshots/ui_display.png" height="300"> <img src="screenshots/device_info.png" height="300">
+</p>
+
+### Từ phiên bản v2.1.0, công cụ hỗ trợ theo dõi các thông số sau thông qua các sensors:
+1. **Sản lượng ngày** mới nhất và ngày trước đó, cùng với **sản lượng tháng** hiện tại (tạm chốt).
+2. **Số tiền** được (tạm) tính từ 3 sản lượng phía trên.
+3. Tình trạng **hóa đơn nợ** và số tiền nợ (nếu có).
+4. **Chỉ số** mới nhất và chỉ số cũ từ ngày đầu kì (ngày bắt đầu hóa đơn tháng).
+5. **Ngày** cập nhật dữ liệu mới nhất cùng với ngày đầu kì.
+
+    > Xem thêm [Ý nghĩa của các sensors](https://github.com/trvqhuy/nestup_evn#1-%C3%BD-ngh%C4%A9a-c%E1%BB%A7a-c%C3%A1c-sensor-%C4%91%C6%B0%E1%BB%A3c-t%E1%BA%A1o-s%E1%BA%B5n) phía dưới để hiểu rõ chức năng / hạn chế của từng thông số trên.
+
+<p align="center">
+<img src="screenshots/sensors_display.png" height="300">
 </p>
 
 ## Lưu ý trước khi cài đặt
@@ -111,7 +125,8 @@ Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài 
 
 <img src="screenshots/device_info.png" width="400">
 
-## Home Assistant: Cách tạo Automation thông báo điện năng tiêu thụ mỗi ngày
+## Home Assistant
+### Cách tạo Automation thông báo điện năng tiêu thụ mỗi ngày
 
 <img src="screenshots/notify_hass.jpg" width="500">
 
@@ -131,13 +146,13 @@ condition:
     value_template: >-
 # Thông thường dữ liệu điện tiêu thụ mới nhất sẽ là của ngày trước đó, 
 #   ví dụ hôm nay ngày 09/09/2022 thì dữ liệu mới nhất là của ngày 08/09/2022
-        {{ states('sensor.ten_device_cua_ban_ngay_moi_nhat') == (now() - timedelta(days=1)).strftime('%d/%m/%Y')}}
+        {{ states('sensor.ten_device_cua_ban_to_date') == (now() - timedelta(days=1)).strftime('%d/%m/%Y')}}
 
 # Nếu như ở khu vực của bạn, dữ liệu điện tiêu thụ từ EVN luôn cập nhật trễ hơn, 
 #   xin hãy thay bằng template phía dưới, với X là số ngày trễ hơn:
 # Ví dụ hôm nay là ngày 09/09/2022, dữ liệu mới nhất là của ngày 06/09/2022, 
 #   luôn trễ hơn 3 ngày, thì X = 3.
-#       {{ states('sensor.ten_device_cua_ban_ngay_moi_nhat') == (now() - timedelta(days=X)).strftime('%d/%m/%Y')}}
+#       {{ states('sensor.ten_device_cua_ban_to_date') == (now() - timedelta(days=X)).strftime('%d/%m/%Y')}}
 
 action:
 # Tùy chình bằng service notify của bạn
@@ -146,12 +161,11 @@ action:
       title: Điện tiêu thụ @ Saigon Home
       message: >
         Dữ liệu ngày
-        {{states('sensor.ten_device_cua_ban_ngay_moi_nhat')}}:{{'\n'}} -
+        {{states('sensor.ten_device_cua_ban_to_date')}}:{{'\n'}} -
         Sản lượng:
-        {{states('sensor.ten_device_cua_ban_san_luong_ngay_moi_nhat')}}
+        {{states('sensor.ten_device_cua_ban_econ_daily_new')}}
         kWh{{'\n'}} - Thành tiền:
-        {{'{0:_.0f}'.format(states('sensor.ten_device_cua_ban_tien_dien_ngay_moi_nhat')|int).replace('_',
-        '.')}} VNĐ
+        {{'{0:_.0f}'.format(states('sensor.ten_device_cua_ban_ecost_daily_new')|int).replace('_','.')}} VNĐ
 ```
 
 ### Chỉnh sửa thông số
@@ -163,17 +177,21 @@ action:
 
 Do thiếu sự đồng bộ về các khái niệm chỉ số điện năng giữa các chi nhánh và tổng công ty EVN, các sensors sẽ được thống nhất như bên dưới:
 
-- **Ngày mới nhất**: (không phải ngày hôm nay) là ngày **đã có đầy đủ các thông tin** về điện năng tiêu thụ - (theo lý thuyết) được tính từ **00:00** đến **23:59** trong ngày đó.
+- **Ngày tạm chốt**: là ngày **đã có đầy đủ các thông tin** về điện năng tiêu thụ - (theo lý thuyết) được tính từ **00:00** đến **23:59** của ngày đó.
 
-- **Ngày bắt đầu hóa đơn**: là ngày đầu tiên trong hóa đơn điện tiêu thụ hàng tháng (xem hóa đơn của các kì trước để biết).
+- **Ngày đầu kì**: là ngày đầu tiên trong hóa đơn điện tiêu thụ hàng tháng (xem hóa đơn của các kì trước để biết).
 
-- **Sản lượng ngày mới nhất**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** đến **23:59** của **ngày mới nhất**.
+- **Chỉ số tạm chốt**: là chỉ số được lấy khi kết thúc **ngày tạm chốt**.
 
-- **Sản lượng tháng**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** của **ngày bắt đầu hóa đơn** đến **23:59** của **ngày mới nhất**.
+- **Chỉ số đầu kì**: là chỉ số được lấy khi bắt đầu **ngày đầu kì**.
 
-Để thuận tiện hơn trong việc theo dõi điện tiêu thụ hàng ngày (ví dụ ước lượng số tiền điện mình sử dụng trong ngày). 2 sensors bên dưới chỉ mang **tính chất tham khảo**, không được lấy trực tiếp từ dữ liệu EVN, mà được tính theo giá bán lẻ bên dưới nên khả năng **sai số là rất cao****
+- **Sản lượng ngày**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** đến **23:59** của **ngày hôm đó**.
 
-- **Tiền điện ngày**: được tính từ **sản lượng ngày mới nhất**.
+- **Sản lượng tháng**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** của **ngày đầu kì** đến **23:59** của **ngày tạm chốt**.
+
+Để thuận tiện hơn trong việc theo dõi điện tiêu thụ hàng ngày (ví dụ ước lượng số tiền điện mình sử dụng trong ngày). 2 sensors bên dưới chỉ mang **tính chất tham khảo**, không được lấy trực tiếp từ dữ liệu EVN, mà được tính theo giá bán lẻ bên dưới nên khả năng **sai số là rất cao***
+
+- Các **tiền điện ngày**: được tính từ các **sản lượng ngày**.
 
 - **Tiền điện tháng**: được tính từ **sản lượng tháng**.
     
@@ -193,13 +211,13 @@ Mặc dù có nhiều loại biểu giá tùy vào mục đích sử dụng đi�
 
 #### Xin phép được gửi lời cảm ơn đến:
 
-- Anh **Pham Dinh Hai** và anh **Huynh Nhat**, vì đã tin tưởng, cung cấp thông tin tài khoản EVNHANOI và EVNCPC, nhờ vậy chủ repo có đủ điều kiện cần thiết để code hỗ trợ cho khu vực Hà Nội và miền Trung Việt Nam.  
+- Anh **Pham Dinh Hai**, anh **Huynh Nhat** và anh **Dương Thanh Bắc**, vì đã tin tưởng, cung cấp thông tin tài khoản EVNHANOI, EVNNPC và EVNCPC, nhờ vậy tác giả đã có đủ điều kiện cần thiết để hỗ trợ cho khu vực Hà Nội, miền Bắc và miền Trung Việt Nam.  
 
-- Anh **Hoang Tung V**, vì những đóng góp cực kì to lớn.
+- Anh **Hoang Tung V**, vì những đóng góp và hỗ trợ cực kì to lớn.
 
 > Không có những người kể trên, repo `nestup_evn` sẽ không ở đây, trở thành một dự án open-source tới cộng đồng HA Việt Nam.
 
-> Lời cuối, chủ repo cũng muốn tự cảm ơn bản thân vì đã tạo ra integration này dành cho tất cả mọi người.
+> Lời cuối, tác giả cũng muốn tự cảm ơn bản thân vì đã tạo ra integration này dành cho tất cả mọi người.
 
 [hacs]: https://github.com/custom-components/hacs
 [hacs-badge]: https://img.shields.io/badge/HACS-default-0468BF.svg?style=for-the-badge
