@@ -13,7 +13,7 @@ Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** 
 2. Cài đặt và chỉnh sửa **trực tiếp bằng UI (thông qua HACS)**, quản lí các thông số điện năng thông qua các thiết bị theo dõi tập trung.
 3. Hỗ trợ cho **tất cả** chi nhánh EVN toàn quốc (bao gồm 5 tổng công ty và hơn 400 chi nhánh lớn nhỏ).
 4. **Tự động** xác định máy chủ EVN.
-5. Tương thích với tất cả platform HA: Core, Supervisors, Hass OS.
+5. Tương thích với tất cả platform HA: **Core**, **Supervisors**, **Hass OS**.
 
 <p align="center">
 <img src="screenshots/ui_display.png" height="300"> <img src="screenshots/device_info.png" height="300">
@@ -177,7 +177,7 @@ action:
 
 Do thiếu sự đồng bộ về các khái niệm chỉ số điện năng giữa các chi nhánh và tổng công ty EVN, các sensors sẽ được thống nhất như bên dưới:
 
-- **Ngày tạm chốt**: là ngày **đã có đầy đủ các thông tin** về điện năng tiêu thụ - (theo lý thuyết) được tính từ **00:00** đến **23:59** của ngày đó.
+- **Ngày tạm chốt**: là ngày **đã có đầy đủ các thông tin** về điện năng tiêu thụ - (theo lý thuyết) được tính từ **00:00** đến **23:59** của ngày đó (khác đối với EVNCPC).
 
 - **Ngày đầu kì**: là ngày đầu tiên trong hóa đơn điện tiêu thụ hàng tháng (xem hóa đơn của các kì trước để biết).
 
@@ -185,13 +185,13 @@ Do thiếu sự đồng bộ về các khái niệm chỉ số điện năng gi�
 
 - **Chỉ số đầu kì**: là chỉ số được lấy khi bắt đầu **ngày đầu kì**.
 
-- **Sản lượng ngày**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** đến **23:59** của **ngày hôm đó**.
+- **Sản lượng ngày**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** đến **23:59** của **ngày hôm đó** (khác đối với EVNCPC).
 
-- **Sản lượng tháng**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** của **ngày đầu kì** đến **23:59** của **ngày tạm chốt**.
+- **Sản lượng tháng**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** của **ngày đầu kì** đến **23:59** của **ngày tạm chốt** (khác đối với EVNCPC).
 
 Để thuận tiện hơn trong việc theo dõi điện tiêu thụ hàng ngày (ví dụ ước lượng số tiền điện mình sử dụng trong ngày). 2 sensors bên dưới chỉ mang **tính chất tham khảo**, không được lấy trực tiếp từ dữ liệu EVN, mà được tính theo giá bán lẻ bên dưới nên khả năng **sai số là rất cao***
 
-- Các **tiền điện ngày**: được tính từ các **sản lượng ngày**.
+- Các sensors **tiền điện ngày**: được tính từ các sensors **sản lượng ngày**.
 
 - **Tiền điện tháng**: được tính từ **sản lượng tháng**.
     
