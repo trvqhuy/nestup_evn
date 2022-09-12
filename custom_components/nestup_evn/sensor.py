@@ -1,12 +1,13 @@
 """Setup and manage HomeAssistant Entities."""
 
-from datetime import timedelta
 import logging
 from typing import Any
 
-from dateutil import parser
-
-from homeassistant.components.sensor import SensorEntity, SensorStateClass
+from homeassistant.components.sensor import (
+    DOMAIN as ENTITY_DOMAIN,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
@@ -24,13 +25,13 @@ from .const import (
     CONF_DEVICE_MODEL,
     CONF_DEVICE_NAME,
     CONF_DEVICE_SW_VERSION,
+    CONF_ERR_INVALID_AUTH,
     CONF_MONTHLY_START,
     CONF_PASSWORD,
     CONF_SUCCESS,
     CONF_USERNAME,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
-    ID_TO_DATE,
 )
 from .types import EVN_SENSORS, EVNSensorEntityDescription
 
@@ -50,7 +51,9 @@ async def async_setup_entry(
     await evn_device.async_create_coordinator(hass)
 
     entities = []
-    entities.extend([EVNSensor(evn_device, description) for description in EVN_SENSORS])
+    entities.extend(
+        [EVNSensor(evn_device, description, hass) for description in EVN_SENSORS]
+    )
 
     async_add_entities(entities)
 
@@ -76,25 +79,41 @@ class EVNDevice:
     async def update(self) -> dict[str, Any]:
         """Update device data from EVN Endpoints."""
 
-        login_state = await self._api.login(
-            self._area_name, self._username, self._password
-        )
-
-        if login_state != CONF_SUCCESS:
-            return
-
         self._data = await self._api.request_update(
             self._area_name, self._customer_id, self._monthly_start
         )
 
-        if self._data["status"] == CONF_SUCCESS:
+        status = self._data.get("status")
+
+        if status != CONF_SUCCESS:
+
+            if status == CONF_ERR_INVALID_AUTH:
+                _LOGGER.info(
+                    "[EVN ID %s] Expired session, try reauthenticating.",
+                    self._customer_id,
+                )
+
+                login_state = await self._api.login(
+                    self._area_name, self._username, self._password
+                )
+
+                if login_state == CONF_SUCCESS:
+                    self._data = await self._api.request_update(
+                        self._area_name, self._customer_id, self._monthly_start
+                    )
+                    status = self._data.get("status")
+
+        if status == CONF_SUCCESS:
             _LOGGER.info(
-                "Successfully fetched new data for EVN Customer ID: %s",
+                "[EVN ID %s] Successfully fetched new data from EVN Server.",
                 self._customer_id,
             )
+
         else:
             _LOGGER.warn(
-                "Could not fetch new data for EVN Customer ID: %s", self._customer_id
+                "[EVN ID %s] Could not fetch new data - %s",
+                self._customer_id,
+                self._data.get("data"),
             )
 
         return self._data
@@ -147,20 +166,39 @@ class EVNDevice:
 class EVNSensor(CoordinatorEntity, SensorEntity):
     """EVN Sensor Instance."""
 
-    def __init__(self, device: EVNDevice, description: EVNSensorEntityDescription):
+    def __init__(
+        self, device: EVNDevice, description: EVNSensorEntityDescription, hass
+    ):
         """Construct EVN sensor wrapper."""
         super().__init__(device.coordinator)
 
         self._device = device
-        self._attr_unique_id = f"{device._customer_id}_{description.key}"
         self._attr_name = f"{device._name} {description.name}"
+        self._unique_id = str(f"{device._customer_id}_{description.key}").lower()
+        self._default_name = description.name
 
+        self.entity_id = (
+            f"{ENTITY_DOMAIN}.{device._customer_id}_{description.key}".lower()
+        )
         self.entity_description = description
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID."""
+        return self._unique_id
 
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        return self.entity_description.value_fn(self._device._data)
+        data = self.entity_description.value_fn(self._device._data)
+
+        if self.entity_description.dynamic_name:
+            self._attr_name = f"{self._default_name} {data.get('info')}"
+
+        if self.entity_description.dynamic_icon:
+            self._attr_icon = data.get("info")
+
+        return data.get("value")
 
     @property
     def device_info(self):
@@ -170,14 +208,16 @@ class EVNSensor(CoordinatorEntity, SensorEntity):
     @property
     def available(self) -> bool:
         """Return the availability of the sensor."""
-        return self._device._data["status"] == CONF_SUCCESS
+        return (
+            self._device._data["status"] == CONF_SUCCESS
+            and self.native_value is not None
+        )
 
     @property
     def last_reset(self):
         if self.entity_description.state_class == SensorStateClass.TOTAL:
-            last_day = parser.parse(
-                self._device._data[ID_TO_DATE], dayfirst=True
-            ) + timedelta(days=1)
-            return last_day
+            data = self.entity_description.value_fn(self._device._data)
+
+            return data.get("info")
 
         return None

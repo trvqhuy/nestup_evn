@@ -11,5 +11,5 @@
      "python_dateutil"
   ],
   "iot_class": "cloud_polling",
-  "version": "1.2.9"
+  "version": "2.1.0"
 }
