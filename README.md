@@ -29,7 +29,7 @@ Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** 
     > Xem thêm [Ý nghĩa của các sensors](https://github.com/trvqhuy/nestup_evn#1-%C3%BD-ngh%C4%A9a-c%E1%BB%A7a-c%C3%A1c-sensor-%C4%91%C6%B0%E1%BB%A3c-t%E1%BA%A1o-s%E1%BA%B5n) phía dưới để hiểu rõ chức năng / hạn chế của từng thông số trên.
 
 <p align="center">
-<img src="screenshots/sensors_display.png" height="300">
+<img src="screenshots/sensors_display.png">
 </p>
 
 ## Lưu ý trước khi cài đặt
