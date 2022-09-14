@@ -67,9 +67,9 @@ Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài 
 |:---:|:---:|:---:|:---:|:---:|
 | EVNHANOI | Thủ đô Hà Nội | ☑️ | [Link](https://evnhanoi.vn/user/login)| [Link](https://evnhanoi.vn/infomation/lien-he)
 | EVNHCMC | Thành phố Hồ Chí Minh | ☑️ | [Link](https://cskh.evnhcmc.vn/)| [Link](https://cskh.evnhcmc.vn/lienhe)
-| EVNNPC | Các tỉnh miền Bắc | ☑️ | [Link](https://cskh.npc.com.vn/home/AccountNPC)| [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
-| EVNCPC | Các tỉnh miền Trung | ☑️ | [Link](https://cskh.cpc.vn/dang-nhap)| [Link](https://cskh.cpc.vn/lien-he)
-| EVNSPC | Các tỉnh miền Nam | ☑️ | [Link](https://www.cskh.evnspc.vn/TaiKhoan/DangNhap)| [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
+| EVNNPC | Khu vực miền Bắc | ☑️ | [Link](https://cskh.npc.com.vn/home/AccountNPC)| [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
+| EVNCPC | Khu vực miền Trung | ☑️ | [Link](https://cskh.cpc.vn/dang-nhap)| [Link](https://cskh.cpc.vn/lien-he)
+| EVNSPC | Khu vực miền Nam | ☑️ | [Link](https://www.cskh.evnspc.vn/TaiKhoan/DangNhap)| [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
 
 ## Cài đặt
 #### **Chú ý:** Sử dụng 1 trong những cách phía dưới để cài đặt công cụ vào HA.
@@ -221,7 +221,7 @@ Mặc dù có nhiều loại biểu giá tùy vào mục đích sử dụng đi�
 
 - Anh **Pham Dinh Hai**, anh **Huynh Nhat** và anh **Dương Thanh Bắc**, vì đã tin tưởng, cung cấp thông tin tài khoản EVNHANOI, EVNNPC và EVNCPC, nhờ vậy tác giả đã có đủ điều kiện cần thiết để hỗ trợ cho khu vực Hà Nội, miền Bắc và miền Trung Việt Nam.  
 
-- Anh **Hoang Tung V**, vì những đóng góp và hỗ trợ cực kì to lớn.
+- Anh **Hoang Tung V**, vì những đóng góp và hỗ trợ cực kì nhiệt tình.
 
 > Không có những người kể trên, repo `nestup_evn` sẽ không ở đây, trở thành một dự án open-source tới cộng đồng HA Việt Nam.
 
