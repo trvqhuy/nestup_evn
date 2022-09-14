@@ -15,6 +15,12 @@ Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** 
 4. **Tự động** xác định máy chủ EVN.
 5. Tương thích với tất cả platform HA: **Core**, **Supervisors**, **Hass OS**.
 
+### Các điểm hạn chế
+1. Chưa hoàn toàn hỗ trợ thêm sensor vào **Energy** (đang thử nghiệm).
+2. Chưa hoàn toàn hỗ trợ đối tượng khác khác ngoài các hộ sinh hoạt tiêu thụ điện 2 pha thông thường.
+3. Sensors về **tiền điện ngày / tháng** chỉ mang tính chất tham khảo, được tính một cách **thủ công** theo [giá bán lẻ bên dưới](https://github.com/trvqhuy/nestup_evn#2-gi%C3%A1-b%C3%A1n-l%E1%BA%BB-%C4%91i%E1%BB%87n-evn), vì vậy khả năng **sai số** là **rất cao**.
+4. Các thông tin không được cập nhật **tức thì** từ dữ liệu mới nhất của EVN, mà luôn được cập nhật theo [chu kì cố định](https://github.com/trvqhuy/nestup_evn#3-chu-k%C3%AC-c%E1%BA%ADp-nh%E1%BA%ADt-d%E1%BB%AF-li%E1%BB%87u-m%E1%BB%9Bi-t%E1%BB%AB-evn).
+
 <p align="center">
 <img src="screenshots/ui_display.png" height="300"> <img src="screenshots/device_info.png" height="300">
 </p>
@@ -185,15 +191,17 @@ Do thiếu sự đồng bộ về các khái niệm chỉ số điện năng gi�
 
 - **Chỉ số đầu kì**: là chỉ số được lấy khi bắt đầu **ngày đầu kì**.
 
-- **Sản lượng ngày**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** đến **23:59** của **ngày hôm đó** (khác đối với EVNCPC).
+- 2 sensors **Sản lượng ngày**: tích hợp tính năng Dynamic Name*, là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** đến **23:59** của **ngày hôm đó** (khác đối với EVNCPC).
+    > **Dynamic Name***: entities sẽ tự động thay đổi tên trên giao diện UI dựa trên thời điểm của dữ liệu đó, ví dụ dữ liệu tạm chốt được lấy **ngày hôm qua** thì sensor ngày tạm chốt sẽ có tên được thể hiện trên UI là **Sản lượng hôm qua**
 
 - **Sản lượng tháng**: là sản lượng điện tiêu thụ được tính (theo lý thuyết) từ **00:00** của **ngày đầu kì** đến **23:59** của **ngày tạm chốt** (khác đối với EVNCPC).
 
-Để thuận tiện hơn trong việc theo dõi điện tiêu thụ hàng ngày (ví dụ ước lượng số tiền điện mình sử dụng trong ngày). 2 sensors bên dưới chỉ mang **tính chất tham khảo**, không được lấy trực tiếp từ dữ liệu EVN, mà được tính theo giá bán lẻ bên dưới nên khả năng **sai số là rất cao***
+Để thuận tiện hơn trong việc theo dõi điện tiêu thụ hàng ngày (ví dụ ước lượng số tiền điện mình sử dụng trong ngày). 2 sensors bên dưới chỉ mang **tính chất tham khảo**, không được lấy trực tiếp từ dữ liệu EVN, mà được tính theo [giá bán lẻ bên dưới](https://github.com/trvqhuy/nestup_evn#2-gi%C3%A1-b%C3%A1n-l%E1%BA%BB-%C4%91i%E1%BB%87n-evn) nên khả năng **sai số là rất cao***
 
 - Các sensors **tiền điện ngày**: được tính từ các sensors **sản lượng ngày**.
 
 - **Tiền điện tháng**: được tính từ **sản lượng tháng**.
+
     
 #### 2. Giá bán lẻ điện EVN:
 
