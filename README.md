@@ -16,8 +16,8 @@ Từ việc sử dụng các phương thức có sẵn của module **AIOHTTP** 
 5. Tương thích với tất cả platform HA: **Core**, **Supervisors**, **Hass OS**.
 
 ### Các điểm hạn chế
-1. Chưa hoàn toàn hỗ trợ thêm sensor vào **Energy** (đang thử nghiệm).
-2. Chưa hoàn toàn hỗ trợ đối tượng khác khác ngoài các hộ sinh hoạt tiêu thụ điện 2 pha thông thường.
+1. Chưa hoàn toàn hỗ trợ thêm sensor vào **Energy**.
+2. Chưa hỗ trợ đối tượng khác ngoài các hộ sinh hoạt tiêu thụ điện 2 pha thông thường.
 3. Sensors về **tiền điện ngày / tháng** chỉ mang tính chất tham khảo, được tính một cách **thủ công** theo [giá bán lẻ bên dưới](https://github.com/trvqhuy/nestup_evn#2-gi%C3%A1-b%C3%A1n-l%E1%BA%BB-%C4%91i%E1%BB%87n-evn), vì vậy khả năng **sai số** là **rất cao**.
 4. Các thông tin không được cập nhật **tức thì** từ dữ liệu mới nhất của EVN, mà luôn được cập nhật theo [chu kì cố định](https://github.com/trvqhuy/nestup_evn#3-chu-k%C3%AC-c%E1%BA%ADp-nh%E1%BA%ADt-d%E1%BB%AF-li%E1%BB%87u-m%E1%BB%9Bi-t%E1%BB%AB-evn).
 
