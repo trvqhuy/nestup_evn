@@ -1,15 +1,17 @@
 {
-  "domain": "nestup_evn",
-  "name": "EVN Data Fetcher",
-  "config_flow": true,
-  "documentation": "https://github.com/trvqhuy/nestup_evn/",
-  "issue_tracker": "https://github.com/trvqhuy/nestup_evn/issues",
-  "dependencies": [],
-  "codeowners": ["@trvqhuy"],
-  "requirements": [
-     "voluptuous==0.13.1",
-     "python_dateutil"
-  ],
-  "iot_class": "cloud_polling",
-  "version": "2.2.0"
+    "codeowners": [
+        "@trvqhuy"
+    ],
+    "config_flow": true,
+    "dependencies": [],
+    "documentation": "https://github.com/trvqhuy/nestup_evn/",
+    "domain": "nestup_evn",
+    "iot_class": "cloud_polling",
+    "issue_tracker": "https://github.com/trvqhuy/nestup_evn/issues",
+    "name": "EVN Data Fetcher",
+    "requirements": [
+        "python_dateutil",
+        "voluptuous==0.13.1"
+    ],
+    "version": "2.2.0"
 }
