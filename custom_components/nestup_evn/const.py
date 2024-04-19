@@ -47,10 +47,10 @@ STATUS_PAYMENT_NEEDED = "Chưa thanh toán"
 VIETNAM_ECOST_VAT = 8  # in %
 VIETNAM_ECOST_STAGES = {
     # kWh : VND
-    0: 1678,
-    50: 1734,
-    100: 2014,
-    200: 2536,
-    300: 2834,
-    400: 2927,
+    0: 1806,
+    50: 1866,
+    100: 2167,
+    200: 2729,
+    300: 3050,
+    400: 3151,
 }
