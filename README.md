@@ -67,7 +67,7 @@ Hiện tại tất cả chi nhánh, vùng miền đều **cần phải có tài 
 |:---:|:---:|:---:|:---:|:---:|
 | EVNHANOI | Thủ đô Hà Nội | ☑️ | [Link](https://evnhanoi.vn/user/login)| [Link](https://evnhanoi.vn/infomation/lien-he)
 | EVNHCMC | Thành phố Hồ Chí Minh | ☑️ | [Link](https://cskh.evnhcmc.vn/)| [Link](https://cskh.evnhcmc.vn/lienhe)
-| EVNNPC | Khu vực miền Bắc | ☑️ | [Link](https://cskh.npc.com.vn/home/AccountNPC)| [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
+| EVNNPC | Khu vực miền Bắc |  | [Link](https://cskh.npc.com.vn/home/AccountNPC)| [Link](https://cskh.npc.com.vn/Home/LienHeNPC)
 | EVNCPC | Khu vực miền Trung | ☑️ | [Link](https://cskh.cpc.vn/dang-nhap)| [Link](https://cskh.cpc.vn/lien-he)
 | EVNSPC | Khu vực miền Nam | ☑️ | [Link](https://www.cskh.evnspc.vn/TaiKhoan/DangNhap)| [Link](https://cskh.evnspc.vn/LienHe/CacKenhTrucTuyen)
 
