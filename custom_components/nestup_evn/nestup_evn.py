@@ -106,7 +106,7 @@ class EVNAPI:
             )
 
         elif evn_area.get("name") == EVN_NAME.SPC:
-            from_date, to_date = generate_datetime(monthly_start, offset=1)
+            from_date, to_date = generate_datetime(monthly_start)
             fetch_data = await self.request_update_evnspc(
                 customer_id, from_date, to_date
             )
