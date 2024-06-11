@@ -118,7 +118,7 @@ class EVNAPI:
             )
 
         elif evn_area.get("name") == EVN_NAME.HCMC:
-            from_date, to_date = generate_datetime(monthly_start)
+            from_date, to_date = generate_datetime(monthly_start, offset=1)
             fetch_data = await self.request_update_evnhcmc(
                 customer_id, from_date, to_date
             )
