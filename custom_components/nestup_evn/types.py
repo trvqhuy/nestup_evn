@@ -7,7 +7,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import ENERGY_KILO_WATT_HOUR
+from homeassistant.const import UnitOfEnergy
 
 from .const import (
     ID_ECON_DAILY_NEW,
@@ -129,7 +129,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
         key=ID_ECON_DAILY_NEW,
         name="Sản lượng",
         icon="mdi:flash-outline",
-        native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: data[ID_ECON_DAILY_NEW],
         dynamic_name=True,
@@ -147,7 +147,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
         key=ID_ECON_DAILY_OLD,
         name="Sản lượng",
         icon="mdi:flash-outline",
-        native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: data[ID_ECON_DAILY_OLD],
         dynamic_name=True,
@@ -165,7 +165,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
         key=ID_ECON_MONTHLY_NEW,
         name="Sản lượng tháng này",
         icon="mdi:flash-outline",
-        native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: data[ID_ECON_MONTHLY_NEW],
     ),
@@ -181,7 +181,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
         key=ID_ECON_TOTAL_NEW,
         name="Chỉ số tạm chốt",
         icon="mdi:arrow-up-bold-box-outline",
-        native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: data[ID_ECON_TOTAL_NEW],
@@ -190,7 +190,7 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
         key=ID_ECON_TOTAL_OLD,
         name="Chỉ số đầu kì",
         icon="mdi:arrow-down-bold-box-outline",
-        native_unit_of_measurement=ENERGY_KILO_WATT_HOUR,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         value_fn=lambda data: data[ID_ECON_TOTAL_OLD],
     ),
