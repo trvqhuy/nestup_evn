@@ -117,7 +117,7 @@ VIETNAM_EVN_AREA = [
         name=EVN_NAME.SPC,
         location="Khu vực miền Nam",
         evn_login_url="https://api.cskh.evnspc.vn/api/user/authenticate",
-        evn_data_url="https://api.cskh.evnspc.vn/api/NghiepVu/LayThongTinSanLuongTheoNgay",
+        evn_data_url="https://api.cskh.evnspc.vn/api/NghiepVu/LayThongTinSanLuongTheoNgay_v1",
         evn_payment_url="https://api.cskh.evnspc.vn/api/NghiepVu/TraCuuNoHoaDon",
         pattern=["PB", "PK"],
     ),

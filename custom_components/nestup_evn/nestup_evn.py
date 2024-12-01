@@ -8,7 +8,6 @@ import logging
 import os
 import ssl
 from typing import Any
-import uuid
 
 from dateutil import parser
 
@@ -62,7 +61,7 @@ class EVNAPI:
 
         self._evn_area = {}
 
-    async def login(self, evn_area, username, password) -> str:
+    async def login(self, evn_area, username, password, customer_id) -> str:
         """Try login into EVN corresponding with different EVN areas"""
 
         self._evn_area = evn_area
@@ -80,7 +79,7 @@ class EVNAPI:
             return await self.login_evncpc(username, password)
 
         elif evn_area.get("name") == EVN_NAME.SPC:
-            return await self.login_evnspc(username, password)
+            return await self.login_evnspc(username, password, customer_id)
 
         elif evn_area.get("name") == EVN_NAME.NPC:
             return await self.login_evnnpc(username, password)
@@ -278,13 +277,13 @@ class EVNAPI:
         _LOGGER.error(f"Error while logging in EVN Endpoints: {resp_json}")
         return CONF_ERR_UNKNOWN
 
-    async def login_evnspc(self, username, password) -> str:
+    async def login_evnspc(self, username, password, customer_id) -> str:
         """Create EVN login session corresponding with EVNSPC Endpoint"""
 
         payload = {
             "strUsername": username,
             "strPassword": password,
-            "strDeviceID": str(uuid.uuid4),
+            "strDeviceID": customer_id,
         }
 
         headers = {
@@ -773,7 +772,9 @@ class EVNAPI:
         self, customer_id, from_date, to_date, last_index="001"
     ):
         """Request new update from EVNSPC Server"""
-
+        from_date_str = (parser.parse(from_date, dayfirst=True) - timedelta(days=1)).strftime("%Y%m%d")
+        to_date_str = parser.parse(to_date, dayfirst=True).strftime("%Y%m%d")
+        
         headers = {
             "User-Agent": "evnapp/59 CFNetwork/1240.0.4 Darwin/20.6.0",
             "Authorization": f"Bearer {self._evn_area.get('access_token')}",
@@ -788,8 +789,8 @@ class EVNAPI:
             headers=headers,
             params={
                 "strMaDiemDo": f"{customer_id}{last_index}",
-                "strFromDate": from_date,
-                "strToDate": to_date,
+                "strFromDate": from_date_str,
+                "strToDate": to_date_str,
             },
             ssl=False,
         )
@@ -799,53 +800,24 @@ class EVNAPI:
         if status != CONF_SUCCESS:
             return resp_json
 
-        from_date = parser.parse(resp_json[0]["strTime"], dayfirst=True)
+        from_date = parser.parse(resp_json[0]["strTime"], dayfirst=True) + timedelta(days=1)
         to_date = parser.parse(
             resp_json[(-1 if len(resp_json) > 1 else 0)]["strTime"], dayfirst=True
-        ) - timedelta(days=1)
+        )
         previous_date = parser.parse(
             resp_json[(-2 if len(resp_json) > 2 else 0)]["strTime"], dayfirst=True
-        ) - timedelta(days=1)
+        )
 
         fetched_data = {
             "status": CONF_SUCCESS,
-            ID_ECON_TOTAL_OLD: round(
-                float(str(resp_json[0]["dGiaoTong"]).replace(",", "")), 2
-            ),
-            ID_ECON_TOTAL_NEW: round(
-                float(
-                    str(
-                        resp_json[(-1 if len(resp_json) > 1 else 0)]["dGiaoTong"]
-                    ).replace(",", "")
-                ),
-                2,
-            ),
-            ID_ECON_DAILY_NEW: round(
-                float(
-                    str(
-                        resp_json[(-1 if len(resp_json) > 1 else 0)]["dSanLuongBT"]
-                    ).replace(",", "")
-                ),
-                2,
-            ),
+            ID_ECON_TOTAL_OLD: round(safe_float(resp_json[0].get("dGiaoBT")), 2),
+            ID_ECON_TOTAL_NEW: round(safe_float(resp_json[-1].get("dGiaoBT")), 2),
+            ID_ECON_DAILY_NEW: round(safe_float(resp_json[-1].get("dSanLuongBT")), 2),
             ID_ECON_DAILY_OLD: round(
-                float(
-                    str(
-                        resp_json[(-2 if len(resp_json) > 2 else 0)]["dSanLuongBT"]
-                    ).replace(",", "")
-                ),
-                2,
+                safe_float(resp_json[-2].get("dSanLuongBT")) if len(resp_json) > 1 else 0.0, 2
             ),
             ID_ECON_MONTHLY_NEW: round(
-                float(
-                    float(
-                        str(
-                            resp_json[(-1 if len(resp_json) > 1 else 0)]["dGiaoTong"]
-                        ).replace(",", "")
-                    )
-                    - float(str(resp_json[0]["dGiaoTong"]).replace(",", ""))
-                ),
-                2,
+                safe_float(resp_json[-1].get("dGiaoBT")) - safe_float(resp_json[0].get("dGiaoBT"))
             ),
             "to_date": to_date.date(),
             "from_date": from_date.date(),
@@ -863,20 +835,17 @@ class EVNAPI:
 
         status, resp_json = await json_processing(resp)
 
-        if status == CONF_EMPTY:
-            payment_status = STATUS_N_PAYMENT_NEEDED
-            m_payment_status = 0
-        elif status == CONF_SUCCESS:
-            payment_status = STATUS_PAYMENT_NEEDED
-
-            if len(resp_json) and "lThanhTien" in resp_json[0]:
-                m_payment_status = int(resp_json[0].get("lThanhTien"))
+        if status == CONF_SUCCESS and resp_json and isinstance(resp_json, list) and resp_json:
+            m_payment_status = int(resp_json[0].get("lTongTien", 0))
+            fetched_data.update({
+                ID_PAYMENT_NEEDED: STATUS_PAYMENT_NEEDED,
+                ID_M_PAYMENT_NEEDED: m_payment_status
+            })
         else:
-            payment_status = CONF_ERR_UNKNOWN
-
-        fetched_data.update(
-            {ID_PAYMENT_NEEDED: payment_status, ID_M_PAYMENT_NEEDED: m_payment_status}
-        )
+            fetched_data.update({
+                ID_PAYMENT_NEEDED: STATUS_N_PAYMENT_NEEDED if status == CONF_EMPTY else CONF_ERR_UNKNOWN,
+                ID_M_PAYMENT_NEEDED: 0
+            })
 
         return fetched_data
 
@@ -1118,3 +1087,9 @@ def calc_ecost(kwh: float) -> str:
     total_price = int(round((total_price / 100) * (100 + VIETNAM_ECOST_VAT)))
 
     return str(total_price)
+
+def safe_float(value, default=0.0):
+    try:
+        return float(str(value).replace(",", "")) if value is not None else default
+    except ValueError:
+        return default
