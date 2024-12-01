@@ -787,7 +787,7 @@ class EVNAPI:
             "Connection": "keep-alive",
         }
 
-        resp = await self._session.get(
+        status, resp_json = await fetch_with_retries(
             url=self._evn_area.get("evn_data_url"),
             headers=headers,
             params={
@@ -795,13 +795,12 @@ class EVNAPI:
                 "strFromDate": from_date_str,
                 "strToDate": to_date_str,
             },
-            ssl=False,
+            session=self._session,
+            api_name="Fetch EVN data"
         )
 
-        status, resp_json = await json_processing(resp)
-
-        if status != CONF_SUCCESS:
-            return resp_json
+        if not resp_json:
+            raise ValueError("Received empty response from EVN data API.")
 
         from_date = parser.parse(resp_json[0]["strTime"], dayfirst=True) + timedelta(days=1)
         to_date = parser.parse(
@@ -827,16 +826,16 @@ class EVNAPI:
             "previous_date": previous_date.date(),
         }
 
-        resp = await self._session.get(
+        status, resp_json = await fetch_with_retries(
             url=self._evn_area.get("evn_payment_url"),
             headers=headers,
             params={
                 "strMaKH": f"{customer_id}",
             },
-            ssl=False,
+            session=self._session,
+            allow_empty=True,
+            api_name="Payment data"
         )
-
-        status, resp_json = await json_processing(resp)
 
         if status == CONF_SUCCESS and resp_json and isinstance(resp_json, list) and resp_json:
             m_payment_status = int(resp_json[0].get("lTongTien", 0))
@@ -850,26 +849,18 @@ class EVNAPI:
                 ID_M_PAYMENT_NEEDED: 0
             })
 
-        resp = await self._session.get(
+        status, resp_json = await fetch_with_retries(
             url=self._evn_area.get("evn_loadshedding_url"),
             headers=headers,
             params={
                 "strMaKH": f"{customer_id}",
             },
-            ssl=False,
+            session=self._session,
+            api_name="EVN loadshedding data"
         )
 
-        status, resp_json = await json_processing(resp)
-        loadshedding_status = STATUS_LOADSHEDDING
-        if status == CONF_EMPTY:
-            loadshedding_status = STATUS_LOADSHEDDING
-        elif status == CONF_SUCCESS:
-            if len(resp_json) and "strThoiGianMatDien" in resp_json[0]:
-                loadshedding_status = str(resp_json[0].get("strThoiGianMatDien"))
-        else:
-            loadshedding_status = CONF_ERR_UNKNOWN
-        fetched_data.update(
-            {ID_LOADSHEDDING: loadshedding_status}
+        fetched_data[ID_LOADSHEDDING] = (
+            resp_json[0].get("strThoiGianMatDien") if resp_json else STATUS_LOADSHEDDING if status == CONF_EMPTY else CONF_ERR_UNKNOWN
         )
 
         return fetched_data
@@ -1138,3 +1129,25 @@ def format_loadshedding(raw_value: str) -> str:
     
     except Exception as e:
         return f"Error: {str(e)}"
+
+async def fetch_with_retries(
+    url, headers, params, max_retries=3, session=None, allow_empty=False, api_name="API"
+):
+    """Fetch data with retry mechanism."""
+    for attempt in range(max_retries):
+        try:
+            resp = await session.get(url=url, headers=headers, params=params, ssl=False)
+            status, resp_json = await json_processing(resp)
+            
+            if status == CONF_EMPTY:
+                return CONF_EMPTY, []
+
+            if status == CONF_SUCCESS or (allow_empty and status == CONF_EMPTY):
+                return status, resp_json
+            
+            _LOGGER.error(f"Attempt {attempt + 1}/{max_retries} failed for {api_name}: {resp_json}")
+        
+        except Exception as e:
+            _LOGGER.error(f"Attempt {attempt + 1}/{max_retries} encountered an error: {str(e)}")
+    
+    raise Exception(f"Failed to fetch data of {api_name} after {max_retries} attempts.")        
