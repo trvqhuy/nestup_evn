@@ -38,9 +38,11 @@ from .const import (
     ID_LATEST_UPDATE,
     ID_M_PAYMENT_NEEDED,
     ID_PAYMENT_NEEDED,
+    ID_LOADSHEDDING,    
     ID_TO_DATE,
     STATUS_N_PAYMENT_NEEDED,
     STATUS_PAYMENT_NEEDED,
+    STATUS_LOADSHEDDING,    
     VIETNAM_ECOST_STAGES,
     VIETNAM_ECOST_VAT,
 )
@@ -772,9 +774,10 @@ class EVNAPI:
         self, customer_id, from_date, to_date, last_index="001"
     ):
         """Request new update from EVNSPC Server"""
+
         from_date_str = (parser.parse(from_date, dayfirst=True) - timedelta(days=1)).strftime("%Y%m%d")
         to_date_str = parser.parse(to_date, dayfirst=True).strftime("%Y%m%d")
-        
+
         headers = {
             "User-Agent": "evnapp/59 CFNetwork/1240.0.4 Darwin/20.6.0",
             "Authorization": f"Bearer {self._evn_area.get('access_token')}",
@@ -847,8 +850,29 @@ class EVNAPI:
                 ID_M_PAYMENT_NEEDED: 0
             })
 
-        return fetched_data
+        resp = await self._session.get(
+            url=self._evn_area.get("evn_loadshedding_url"),
+            headers=headers,
+            params={
+                "strMaKH": f"{customer_id}",
+            },
+            ssl=False,
+        )
 
+        status, resp_json = await json_processing(resp)
+        loadshedding_status = STATUS_LOADSHEDDING
+        if status == CONF_EMPTY:
+            loadshedding_status = STATUS_LOADSHEDDING
+        elif status == CONF_SUCCESS:
+            if len(resp_json) and "strThoiGianMatDien" in resp_json[0]:
+                loadshedding_status = str(resp_json[0].get("strThoiGianMatDien"))
+        else:
+            loadshedding_status = CONF_ERR_UNKNOWN
+        fetched_data.update(
+            {ID_LOADSHEDDING: loadshedding_status}
+        )
+
+        return fetched_data
 
 async def json_processing(resp):
     resp_json: dict = {}
@@ -973,6 +997,13 @@ def formatted_result(raw_data: dict) -> dict:
         ),
     }
 
+    original_content = str(raw_data.get(ID_LOADSHEDDING, "Unknown"))
+    formatted_content = format_loadshedding(original_content)
+    res[ID_LOADSHEDDING] = {
+        "value": formatted_content,
+        "info": "mdi:transmission-tower-off",
+    }
+
     if ID_FROM_DATE in raw_data:
         res[ID_FROM_DATE] = {"value": raw_data.get("from_date").strftime("%d/%m/%Y")}
     else:
@@ -1093,3 +1124,17 @@ def safe_float(value, default=0.0):
         return float(str(value).replace(",", "")) if value is not None else default
     except ValueError:
         return default
+
+def format_loadshedding(raw_value: str) -> str:
+    try:
+        start, end = raw_value.replace('từ ', '').replace(' ngày', '').split('đến')
+        start_time, start_date = start.strip().split()
+        end_time, end_date = end.strip().split()
+        start_time = start_time[:-3]
+        end_time = end_time[:-3]
+        start_date = start_date[:-5]
+        end_date = end_date[:-5]
+        return f"{start_time} {start_date} - {end_time} {end_date}"
+    
+    except Exception as e:
+        return f"Error: {str(e)}"
