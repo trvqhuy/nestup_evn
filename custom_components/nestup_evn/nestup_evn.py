@@ -8,7 +8,6 @@ import logging
 import os
 import ssl
 from typing import Any
-import uuid
 
 from dateutil import parser
 
@@ -39,9 +38,11 @@ from .const import (
     ID_LATEST_UPDATE,
     ID_M_PAYMENT_NEEDED,
     ID_PAYMENT_NEEDED,
+    ID_LOADSHEDDING,    
     ID_TO_DATE,
     STATUS_N_PAYMENT_NEEDED,
     STATUS_PAYMENT_NEEDED,
+    STATUS_LOADSHEDDING,    
     VIETNAM_ECOST_STAGES,
     VIETNAM_ECOST_VAT,
 )
@@ -62,7 +63,7 @@ class EVNAPI:
 
         self._evn_area = {}
 
-    async def login(self, evn_area, username, password) -> str:
+    async def login(self, evn_area, username, password, customer_id) -> str:
         """Try login into EVN corresponding with different EVN areas"""
 
         self._evn_area = evn_area
@@ -80,7 +81,7 @@ class EVNAPI:
             return await self.login_evncpc(username, password)
 
         elif evn_area.get("name") == EVN_NAME.SPC:
-            return await self.login_evnspc(username, password)
+            return await self.login_evnspc(username, password, customer_id)
 
         elif evn_area.get("name") == EVN_NAME.NPC:
             return await self.login_evnnpc(username, password)
@@ -278,13 +279,13 @@ class EVNAPI:
         _LOGGER.error(f"Error while logging in EVN Endpoints: {resp_json}")
         return CONF_ERR_UNKNOWN
 
-    async def login_evnspc(self, username, password) -> str:
+    async def login_evnspc(self, username, password, customer_id) -> str:
         """Create EVN login session corresponding with EVNSPC Endpoint"""
 
         payload = {
             "strUsername": username,
             "strPassword": password,
-            "strDeviceID": str(uuid.uuid4),
+            "strDeviceID": customer_id,
         }
 
         headers = {
@@ -774,6 +775,9 @@ class EVNAPI:
     ):
         """Request new update from EVNSPC Server"""
 
+        from_date_str = (parser.parse(from_date, dayfirst=True) - timedelta(days=1)).strftime("%Y%m%d")
+        to_date_str = parser.parse(to_date, dayfirst=True).strftime("%Y%m%d")
+
         headers = {
             "User-Agent": "evnapp/59 CFNetwork/1240.0.4 Darwin/20.6.0",
             "Authorization": f"Bearer {self._evn_area.get('access_token')}",
@@ -783,103 +787,83 @@ class EVNAPI:
             "Connection": "keep-alive",
         }
 
-        resp = await self._session.get(
+        status, resp_json = await fetch_with_retries(
             url=self._evn_area.get("evn_data_url"),
             headers=headers,
             params={
                 "strMaDiemDo": f"{customer_id}{last_index}",
-                "strFromDate": from_date,
-                "strToDate": to_date,
+                "strFromDate": from_date_str,
+                "strToDate": to_date_str,
             },
-            ssl=False,
+            session=self._session,
+            api_name="Fetch EVN data"
         )
 
-        status, resp_json = await json_processing(resp)
+        if not resp_json:
+            raise ValueError("Received empty response from EVN data API.")
 
-        if status != CONF_SUCCESS:
-            return resp_json
-
-        from_date = parser.parse(resp_json[0]["strTime"], dayfirst=True)
+        from_date = parser.parse(resp_json[0]["strTime"], dayfirst=True) + timedelta(days=1)
         to_date = parser.parse(
             resp_json[(-1 if len(resp_json) > 1 else 0)]["strTime"], dayfirst=True
-        ) - timedelta(days=1)
+        )
         previous_date = parser.parse(
             resp_json[(-2 if len(resp_json) > 2 else 0)]["strTime"], dayfirst=True
-        ) - timedelta(days=1)
+        )
 
         fetched_data = {
             "status": CONF_SUCCESS,
-            ID_ECON_TOTAL_OLD: round(
-                float(str(resp_json[0]["dGiaoTong"]).replace(",", "")), 2
-            ),
-            ID_ECON_TOTAL_NEW: round(
-                float(
-                    str(
-                        resp_json[(-1 if len(resp_json) > 1 else 0)]["dGiaoTong"]
-                    ).replace(",", "")
-                ),
-                2,
-            ),
-            ID_ECON_DAILY_NEW: round(
-                float(
-                    str(
-                        resp_json[(-1 if len(resp_json) > 1 else 0)]["dSanLuongBT"]
-                    ).replace(",", "")
-                ),
-                2,
-            ),
+            ID_ECON_TOTAL_OLD: round(safe_float(resp_json[0].get("dGiaoBT")), 2),
+            ID_ECON_TOTAL_NEW: round(safe_float(resp_json[-1].get("dGiaoBT")), 2),
+            ID_ECON_DAILY_NEW: round(safe_float(resp_json[-1].get("dSanLuongBT")), 2),
             ID_ECON_DAILY_OLD: round(
-                float(
-                    str(
-                        resp_json[(-2 if len(resp_json) > 2 else 0)]["dSanLuongBT"]
-                    ).replace(",", "")
-                ),
-                2,
+                safe_float(resp_json[-2].get("dSanLuongBT")) if len(resp_json) > 1 else 0.0, 2
             ),
             ID_ECON_MONTHLY_NEW: round(
-                float(
-                    float(
-                        str(
-                            resp_json[(-1 if len(resp_json) > 1 else 0)]["dGiaoTong"]
-                        ).replace(",", "")
-                    )
-                    - float(str(resp_json[0]["dGiaoTong"]).replace(",", ""))
-                ),
-                2,
+                safe_float(resp_json[-1].get("dGiaoBT")) - safe_float(resp_json[0].get("dGiaoBT"))
             ),
             "to_date": to_date.date(),
             "from_date": from_date.date(),
             "previous_date": previous_date.date(),
         }
 
-        resp = await self._session.get(
+        status, resp_json = await fetch_with_retries(
             url=self._evn_area.get("evn_payment_url"),
             headers=headers,
             params={
                 "strMaKH": f"{customer_id}",
             },
-            ssl=False,
+            session=self._session,
+            allow_empty=True,
+            api_name="Payment data"
         )
 
-        status, resp_json = await json_processing(resp)
-
-        if status == CONF_EMPTY:
-            payment_status = STATUS_N_PAYMENT_NEEDED
-            m_payment_status = 0
-        elif status == CONF_SUCCESS:
-            payment_status = STATUS_PAYMENT_NEEDED
-
-            if len(resp_json) and "lThanhTien" in resp_json[0]:
-                m_payment_status = int(resp_json[0].get("lThanhTien"))
+        if status == CONF_SUCCESS and resp_json and isinstance(resp_json, list) and resp_json:
+            m_payment_status = int(resp_json[0].get("lTongTien", 0))
+            fetched_data.update({
+                ID_PAYMENT_NEEDED: STATUS_PAYMENT_NEEDED,
+                ID_M_PAYMENT_NEEDED: m_payment_status
+            })
         else:
-            payment_status = CONF_ERR_UNKNOWN
+            fetched_data.update({
+                ID_PAYMENT_NEEDED: STATUS_N_PAYMENT_NEEDED if status == CONF_EMPTY else CONF_ERR_UNKNOWN,
+                ID_M_PAYMENT_NEEDED: 0
+            })
 
-        fetched_data.update(
-            {ID_PAYMENT_NEEDED: payment_status, ID_M_PAYMENT_NEEDED: m_payment_status}
+        status, resp_json = await fetch_with_retries(
+            url=self._evn_area.get("evn_loadshedding_url"),
+            headers=headers,
+            params={
+                "strMaKH": f"{customer_id}",
+            },
+            session=self._session,
+            api_name="EVN loadshedding data"
+        )
+
+        fetched_data[ID_LOADSHEDDING] = (
+            resp_json[0].get("strThoiGianMatDien") if resp_json else STATUS_LOADSHEDDING if status == CONF_EMPTY else CONF_ERR_UNKNOWN
         )
 
         return fetched_data
-
 
 async def json_processing(resp):
     resp_json: dict = {}
@@ -1004,6 +988,13 @@ def formatted_result(raw_data: dict) -> dict:
         ),
     }
 
+    original_content = str(raw_data.get(ID_LOADSHEDDING, "Unknown"))
+    formatted_content = format_loadshedding(original_content)
+    res[ID_LOADSHEDDING] = {
+        "value": formatted_content,
+        "info": "mdi:transmission-tower-off",
+    }
+
     if ID_FROM_DATE in raw_data:
         res[ID_FROM_DATE] = {"value": raw_data.get("from_date").strftime("%d/%m/%Y")}
     else:
@@ -1118,3 +1109,45 @@ def calc_ecost(kwh: float) -> str:
     total_price = int(round((total_price / 100) * (100 + VIETNAM_ECOST_VAT)))
 
     return str(total_price)
+
+def safe_float(value, default=0.0):
+    try:
+        return float(str(value).replace(",", "")) if value is not None else default
+    except ValueError:
+        return default
+
+def format_loadshedding(raw_value: str) -> str:
+    try:
+        start, end = raw_value.replace('từ ', '').replace(' ngày', '').split('đến')
+        start_time, start_date = start.strip().split()
+        end_time, end_date = end.strip().split()
+        start_time = start_time[:-3]
+        end_time = end_time[:-3]
+        start_date = start_date[:-5]
+        end_date = end_date[:-5]
+        return f"{start_time} {start_date} - {end_time} {end_date}"
+    
+    except Exception as e:
+        return f"Error: {str(e)}"
+
+async def fetch_with_retries(
+    url, headers, params, max_retries=3, session=None, allow_empty=False, api_name="API"
+):
+    """Fetch data with retry mechanism."""
+    for attempt in range(max_retries):
+        try:
+            resp = await session.get(url=url, headers=headers, params=params, ssl=False)
+            status, resp_json = await json_processing(resp)
+            
+            if status == CONF_EMPTY:
+                return CONF_EMPTY, []
+
+            if status == CONF_SUCCESS or (allow_empty and status == CONF_EMPTY):
+                return status, resp_json
+            
+            _LOGGER.error(f"Attempt {attempt + 1}/{max_retries} failed for {api_name}: {resp_json}")
+        
+        except Exception as e:
+            _LOGGER.error(f"Attempt {attempt + 1}/{max_retries} encountered an error: {str(e)}")
+    
+    raise Exception(f"Failed to fetch data of {api_name} after {max_retries} attempts.")        

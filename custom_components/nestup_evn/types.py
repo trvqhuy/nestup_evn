@@ -22,6 +22,7 @@ from .const import (
     ID_LATEST_UPDATE,
     ID_M_PAYMENT_NEEDED,
     ID_PAYMENT_NEEDED,
+    ID_LOADSHEDDING,
     ID_TO_DATE,
 )
 
@@ -48,6 +49,7 @@ class Area:
     evn_login_url: str | None = None
     evn_data_url: str | None = None
     evn_payment_url: str | None = None
+    evn_loadshedding_url: str | None = None
     supported: bool = True
     date_needed: bool = True
     pattern: ArrayType | None = None
@@ -117,8 +119,9 @@ VIETNAM_EVN_AREA = [
         name=EVN_NAME.SPC,
         location="Khu vực miền Nam",
         evn_login_url="https://api.cskh.evnspc.vn/api/user/authenticate",
-        evn_data_url="https://api.cskh.evnspc.vn/api/NghiepVu/LayThongTinSanLuongTheoNgay",
+        evn_data_url="https://api.cskh.evnspc.vn/api/NghiepVu/LayThongTinSanLuongTheoNgay_v1",
         evn_payment_url="https://api.cskh.evnspc.vn/api/NghiepVu/TraCuuNoHoaDon",
+        evn_loadshedding_url="https://api.cskh.evnspc.vn/api/NghiepVu/TraCuuLichNgungGiamCungCapDien",
         pattern=["PB", "PK"],
     ),
 ]
@@ -228,6 +231,13 @@ EVN_SENSORS: tuple[EVNSensorEntityDescription, ...] = (
         icon="mdi:cash-multiple",
         native_unit_of_measurement="VNĐ",
         value_fn=lambda data: data[ID_M_PAYMENT_NEEDED],
+        dynamic_icon=True,
+    ),
+    EVNSensorEntityDescription(
+        key=ID_LOADSHEDDING,
+        name="Lịch cắt điện",
+        icon="mdi:transmission-tower-off",
+        value_fn=lambda data: data[ID_LOADSHEDDING],
         dynamic_icon=True,
     ),
 )

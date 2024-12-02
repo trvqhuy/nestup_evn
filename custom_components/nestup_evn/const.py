@@ -37,12 +37,14 @@ ID_ECOST_DAILY_OLD = "ecost_daily_old"
 ID_ECOST_MONTHLY_NEW = "ecost_monthly_new"
 ID_PAYMENT_NEEDED = "payment_needed"
 ID_M_PAYMENT_NEEDED = "m_payment_needed"
+ID_LOADSHEDDING = "loadshedding"
 ID_FROM_DATE = "from_date"
 ID_TO_DATE = "to_date"
 ID_LATEST_UPDATE = "latest_update"
 
 STATUS_N_PAYMENT_NEEDED = "Đã thanh toán"
 STATUS_PAYMENT_NEEDED = "Chưa thanh toán"
+STATUS_LOADSHEDDING = "Không có lịch cắt điện"
 
 VIETNAM_ECOST_VAT = 8  # in %
 VIETNAM_ECOST_STAGES = {

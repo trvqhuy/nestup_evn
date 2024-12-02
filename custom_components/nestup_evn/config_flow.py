@@ -165,6 +165,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._user_data.get(CONF_AREA),
                 self._user_data.get(CONF_USERNAME),
                 self._user_data.get(CONF_PASSWORD),
+                self._user_data.get(CONF_CUSTOMER_ID),
             )
         except Exception as e:
             _LOGGER.exception(f"Unexpected exception: {e}")
