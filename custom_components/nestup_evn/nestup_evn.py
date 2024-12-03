@@ -907,7 +907,6 @@ async def json_processing(resp):
 
     return CONF_SUCCESS, resp_json
 
-
 def formatted_result(raw_data: dict) -> dict:
     res = {}
     time_obj = datetime.now()
@@ -988,8 +987,11 @@ def formatted_result(raw_data: dict) -> dict:
         ),
     }
 
-    original_content = str(raw_data.get(ID_LOADSHEDDING, "Unknown"))
-    formatted_content = format_loadshedding(original_content)
+    original_content = raw_data.get(ID_LOADSHEDDING, "Không hỗ trợ")
+    formatted_content = (
+        format_loadshedding(original_content) if original_content != "Không hỗ trợ" else STATUS_LOADSHEDDING
+    )
+
     res[ID_LOADSHEDDING] = {
         "value": formatted_content,
         "info": "mdi:transmission-tower-off",
@@ -1118,17 +1120,27 @@ def safe_float(value, default=0.0):
 
 def format_loadshedding(raw_value: str) -> str:
     try:
+        if not raw_value or 'đến' not in raw_value:
+            return STATUS_LOADSHEDDING
+            
         start, end = raw_value.replace('từ ', '').replace(' ngày', '').split('đến')
-        start_time, start_date = start.strip().split()
-        end_time, end_date = end.strip().split()
+        start = start.strip().split()
+        end = end.strip().split()
+        if len(start) != 2 or len(end) != 2:
+            return STATUS_LOADSHEDDING
+
+        start_time, start_date = start
+        end_time, end_date = end
+
         start_time = start_time[:-3]
         end_time = end_time[:-3]
         start_date = start_date[:-5]
         end_date = end_date[:-5]
+
         return f"{start_time} {start_date} - {end_time} {end_date}"
     
     except Exception as e:
-        return f"Error: {str(e)}"
+        return STATUS_LOADSHEDDING
 
 async def fetch_with_retries(
     url, headers, params, max_retries=3, session=None, allow_empty=False, api_name="API"
