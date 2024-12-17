@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import ssl
+import time
 from typing import Any
 
 from dateutil import parser
@@ -89,37 +90,35 @@ class EVNAPI:
         return CONF_ERR_UNKNOWN
 
     async def request_update(
-        self, evn_area: Area, customer_id, monthly_start=None
+        self, evn_area: Area, username, password, customer_id, monthly_start=None
     ) -> dict[str, Any]:
         """Request new update from EVN Server, corresponding with the last session"""
 
         self._evn_area = evn_area
 
         fetch_data = {}
+        
+        from_date, to_date = generate_datetime(monthly_start, offset=1)
 
         if evn_area.get("name") == EVN_NAME.CPC:
             fetch_data = await self.request_update_evncpc(customer_id)
 
-        elif evn_area.get("name") == EVN_NAME.HANOI:
-            from_date, to_date = generate_datetime(monthly_start, offset=1)
+        elif evn_area.get("name") == EVN_NAME.HANOI:            
             fetch_data = await self.request_update_evnhanoi(
-                customer_id, from_date, to_date
+                username, password, customer_id, from_date, to_date
             )
 
         elif evn_area.get("name") == EVN_NAME.SPC:
-            from_date, to_date = generate_datetime(monthly_start, offset=1)
             fetch_data = await self.request_update_evnspc(
                 customer_id, from_date, to_date
             )
 
         elif evn_area.get("name") == EVN_NAME.NPC:
-            from_date, to_date = generate_datetime(monthly_start, offset=1)
             fetch_data = await self.request_update_evnnpc(
                 customer_id, from_date, to_date
             )
 
         elif evn_area.get("name") == EVN_NAME.HCMC:
-            from_date, to_date = generate_datetime(monthly_start, offset=1)
             fetch_data = await self.request_update_evnhcmc(
                 customer_id, from_date, to_date
             )
@@ -159,6 +158,9 @@ class EVNAPI:
 
         elif "access_token" in resp_json:
             self._evn_area["access_token"] = resp_json["access_token"]
+            if "expires_in" in resp_json:
+                expires_in = resp_json["expires_in"]
+                self._evn_area["token_expiry"] = time.time() + expires_in
             return CONF_SUCCESS
 
         _LOGGER.error(f"Error while logging in EVN Endpoints: {resp_json}")
@@ -318,10 +320,15 @@ class EVNAPI:
         return CONF_SUCCESS
 
     async def request_update_evnhanoi(
-        self, customer_id, from_date, to_date, last_index="001"
+        self, username, password, customer_id, from_date, to_date, last_index="001"
     ):
         """Request new update from EVNHANOI Server"""
 
+        if self.is_token_expired():
+            login_status = await self.login_evnhanoi(username, password)
+            if login_status != CONF_SUCCESS:
+                raise ConfigEntryNotReady("Token expired and failed to reauthenticate")
+                    
         headers = {
             "Authorization": f"Bearer {self._evn_area.get('access_token')}",
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
@@ -358,7 +365,7 @@ class EVNAPI:
 
                 if last_index == "001":
                     return await self.request_update_evnhanoi(
-                        customer_id, from_date, to_date, "1"
+                        username, password, customer_id, from_date, to_date, last_index="1"
                     )
 
                 return {"status": CONF_ERR_INVALID_ID, "data": resp_json}
@@ -437,6 +444,10 @@ class EVNAPI:
         )
 
         return fetched_data
+
+    def is_token_expired(self) -> bool:
+        expiry_time = self._evn_area.get("token_expiry", 0)
+        return time.time() > expiry_time
 
     async def request_update_evnhcmc(self, customer_id, from_date, to_date):
         """Request new update from EVNHCMC Server"""

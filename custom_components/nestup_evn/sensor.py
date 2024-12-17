@@ -80,7 +80,7 @@ class EVNDevice:
         """Update device data from EVN Endpoints."""
 
         self._data = await self._api.request_update(
-            self._area_name, self._customer_id, self._monthly_start
+            self._area_name, self._username, self._password, self._customer_id, self._monthly_start
         )
 
         status = self._data.get("status")
