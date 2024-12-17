@@ -182,6 +182,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         try:
             res = await self._api.request_update(
                 self._user_data.get(CONF_AREA),
+                self._user_data.get(CONF_USERNAME),
+                self._user_data.get(CONF_PASSWORD),                
                 self._user_data.get(CONF_CUSTOMER_ID),
                 self._user_data.get(CONF_MONTHLY_START),
             )
