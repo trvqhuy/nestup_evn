@@ -524,10 +524,10 @@ class EVNAPI:
 
         from_date = parser.parse(resp_json[0]["ngayFull"], dayfirst=True)
         to_date = parser.parse(
-            resp_json[(-1 if len(resp_json) > 1 else 0)]["ngayFull"], dayfirst=True
+            resp_json[(-2 if len(resp_json) > 2 else 0)]["ngayFull"], dayfirst=True
         )
         previous_date = parser.parse(
-            resp_json[(-2 if len(resp_json) > 2 else 0)]["ngayFull"], dayfirst=True
+            resp_json[(-3 if len(resp_json) > 3 else 0)]["ngayFull"], dayfirst=True
         )
 
         econ_total_new = round(
@@ -548,7 +548,7 @@ class EVNAPI:
             ID_ECON_TOTAL_NEW: econ_total_new,
             ID_ECON_DAILY_NEW: round(
                 float(
-                    str(resp_json[(-1 if len(resp_json) > 1 else 0)]["Tong"]).replace(
+                    str(resp_json[(-2 if len(resp_json) > 2 else 0)]["Tong"]).replace(
                         ",", ""
                     )
                 ),
@@ -556,7 +556,7 @@ class EVNAPI:
             ),
             ID_ECON_DAILY_OLD: round(
                 float(
-                    str(resp_json[(-2 if len(resp_json) > 2 else 0)]["Tong"]).replace(
+                    str(resp_json[(-3 if len(resp_json) > 3 else 0)]["Tong"]).replace(
                         ",", ""
                     )
                 ),
