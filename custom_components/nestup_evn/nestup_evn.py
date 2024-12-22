@@ -1031,10 +1031,15 @@ def formatted_result(raw_data: dict) -> dict:
         ),
     }
 
-    original_content = raw_data.get(ID_LOADSHEDDING, "Không hỗ trợ")
-    formatted_content = (
-        format_loadshedding(original_content) if original_content != "Không hỗ trợ" else STATUS_LOADSHEDDING
-    )
+    if raw_data.get(ID_LOADSHEDDING) is not None:
+        original_content = raw_data.get(ID_LOADSHEDDING)
+        formatted_content = (
+            format_loadshedding(original_content)
+            if original_content
+            else STATUS_LOADSHEDDING
+        )
+    else:
+        formatted_content = "Không hỗ trợ"
 
     res[ID_LOADSHEDDING] = {
         "value": formatted_content,
@@ -1051,7 +1056,6 @@ def formatted_result(raw_data: dict) -> dict:
     res[ID_LATEST_UPDATE] = {"value": time_obj.astimezone()}
 
     return res
-
 
 def get_evn_info(evn_customer_id: str):
     """Get EVN infomations based on Customer ID -> EVN Company, location, branches,..."""
