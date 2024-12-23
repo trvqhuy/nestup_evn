@@ -2,7 +2,7 @@
 
 import base64
 from dataclasses import asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 import logging
 import os
@@ -120,7 +120,7 @@ class EVNAPI:
 
         elif evn_area.get("name") == EVN_NAME.HCMC:
             fetch_data = await self.request_update_evnhcmc(
-                customer_id, from_date, to_date
+                username, password, customer_id, from_date, to_date
             )
 
         if fetch_data["status"] == CONF_SUCCESS:
@@ -194,8 +194,23 @@ class EVNAPI:
 
         login_state = resp_json["state"]
 
-        if (login_state == CONF_SUCCESS) or (login_state == "login"):
-            return CONF_SUCCESS
+        if login_state in (CONF_SUCCESS, "login"):
+            cookies = resp.headers.get("Set-Cookie", "")
+            evn_session = None
+            expires = None
+            for cookie in cookies.split(";"):
+                if "evn_session=" in cookie:
+                    evn_session = cookie.split("evn_session=")[-1].strip()
+                if "expires=" in cookie:
+                    expires = cookie.split("expires=")[-1].strip()
+                    expires = parser.parse(expires)
+
+            if evn_session:
+                self._evn_area["evn_session"] = evn_session
+                if expires:
+                    self._evn_area["expires"] = expires.replace(tzinfo=timezone.utc)
+                    _LOGGER.info("Login successful. Session: %s", evn_session)
+                    return CONF_SUCCESS
 
         _LOGGER.error(f"Unable to login into EVN Endpoint: {resp_json}")
         return CONF_ERR_INVALID_AUTH
@@ -449,14 +464,31 @@ class EVNAPI:
         expiry_time = self._evn_area.get("token_expiry", 0)
         return time.time() > expiry_time
 
-    async def request_update_evnhcmc(self, customer_id, from_date, to_date):
+    async def request_update_evnhcmc(self, username, password, customer_id, from_date, to_date):
         """Request new update from EVNHCMC Server"""
+
+        evn_session_expires = self._evn_area.get("expires")
+        if isinstance(evn_session_expires, datetime):
+            evn_session_expires = evn_session_expires.astimezone(timezone.utc)
+        else:    
+            evn_session_expires = None
+
+        if not evn_session_expires:
+            login_status = await self.login_evnhcmc(username, password)
+            if login_status != CONF_SUCCESS:
+                raise ConfigEntryNotReady("Failed to reauthenticate due to invalid session expiration.")
+        elif datetime.now(tz=timezone.utc) >= evn_session_expires:
+            _LOGGER.info("Session expired. Attempting to login again...")
+            login_status = await self.login_evnhcmc(username, password)
+            if login_status != CONF_SUCCESS:
+                raise ConfigEntryNotReady("Session expired and failed to reauthenticate")       
 
         headers = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
             "Accept": "application/json",
             "Accept-Encoding": "gzip, deflate, br",
             "Connection": "keep-alive",
+            "Cookie": f"evn_session={self._evn_area.get('evn_session')}",
         }
 
         ssl_context = ssl.create_default_context()
@@ -492,10 +524,10 @@ class EVNAPI:
 
         from_date = parser.parse(resp_json[0]["ngayFull"], dayfirst=True)
         to_date = parser.parse(
-            resp_json[(-1 if len(resp_json) > 1 else 0)]["ngayFull"], dayfirst=True
+            resp_json[(-2 if len(resp_json) > 2 else 0)]["ngayFull"], dayfirst=True
         )
         previous_date = parser.parse(
-            resp_json[(-2 if len(resp_json) > 2 else 0)]["ngayFull"], dayfirst=True
+            resp_json[(-3 if len(resp_json) > 3 else 0)]["ngayFull"], dayfirst=True
         )
 
         econ_total_new = round(
@@ -516,7 +548,7 @@ class EVNAPI:
             ID_ECON_TOTAL_NEW: econ_total_new,
             ID_ECON_DAILY_NEW: round(
                 float(
-                    str(resp_json[(-1 if len(resp_json) > 1 else 0)]["Tong"]).replace(
+                    str(resp_json[(-2 if len(resp_json) > 2 else 0)]["Tong"]).replace(
                         ",", ""
                     )
                 ),
@@ -524,7 +556,7 @@ class EVNAPI:
             ),
             ID_ECON_DAILY_OLD: round(
                 float(
-                    str(resp_json[(-2 if len(resp_json) > 2 else 0)]["Tong"]).replace(
+                    str(resp_json[(-3 if len(resp_json) > 3 else 0)]["Tong"]).replace(
                         ",", ""
                     )
                 ),
@@ -540,6 +572,7 @@ class EVNAPI:
             url=self._evn_area.get("evn_payment_url"),
             data={"input_makh": customer_id},
             ssl=ssl_context,
+            headers=headers,
         )
         status, resp_json = await json_processing(resp)
 
@@ -998,10 +1031,15 @@ def formatted_result(raw_data: dict) -> dict:
         ),
     }
 
-    original_content = raw_data.get(ID_LOADSHEDDING, "Không hỗ trợ")
-    formatted_content = (
-        format_loadshedding(original_content) if original_content != "Không hỗ trợ" else STATUS_LOADSHEDDING
-    )
+    if raw_data.get(ID_LOADSHEDDING) is not None:
+        original_content = raw_data.get(ID_LOADSHEDDING)
+        formatted_content = (
+            format_loadshedding(original_content)
+            if original_content
+            else STATUS_LOADSHEDDING
+        )
+    else:
+        formatted_content = "Không hỗ trợ"
 
     res[ID_LOADSHEDDING] = {
         "value": formatted_content,
@@ -1018,7 +1056,6 @@ def formatted_result(raw_data: dict) -> dict:
     res[ID_LATEST_UPDATE] = {"value": time_obj.astimezone()}
 
     return res
-
 
 def get_evn_info(evn_customer_id: str):
     """Get EVN infomations based on Customer ID -> EVN Company, location, branches,..."""
