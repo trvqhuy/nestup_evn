@@ -96,13 +96,13 @@ class EVNAPI:
 
         self._evn_area = evn_area
 
-        fetch_data = {}
+        fetch_data = {}        
         
-        from_date, to_date = generate_datetime(monthly_start, offset=1)
+        from_date, to_date = generate_datetime(1 if evn_area.get("name") == EVN_NAME.CPC else monthly_start, offset=1)
 
         if evn_area.get("name") == EVN_NAME.CPC:
             fetch_data = await self.request_update_evncpc(customer_id)
-
+            
         elif evn_area.get("name") == EVN_NAME.HANOI:            
             fetch_data = await self.request_update_evnhanoi(
                 username, password, customer_id, from_date, to_date
@@ -1049,7 +1049,8 @@ def formatted_result(raw_data: dict) -> dict:
     if ID_FROM_DATE in raw_data:
         res[ID_FROM_DATE] = {"value": raw_data.get("from_date").strftime("%d/%m/%Y")}
     else:
-        res[ID_FROM_DATE] = {"value": "Không hỗ trợ"}
+        first_day_of_month = datetime.now().replace(day=1)
+        res[ID_FROM_DATE] = {"value": first_day_of_month.strftime("%d/%m/%Y")}
 
     res[ID_TO_DATE] = {"value": raw_data.get("to_date").strftime("%d/%m/%Y")}
 
@@ -1085,7 +1086,6 @@ def get_evn_info(evn_customer_id: str):
                 }
 
     return {"status": CONF_ERR_NOT_SUPPORTED}
-
 
 def generate_datetime(monthly_start=1, offset=0):
     """Generate Datetime as string for requesting data purposes"""
@@ -1135,7 +1135,6 @@ def generate_datetime(monthly_start=1, offset=0):
             from_date = f"{monthly_start_str}/12/{last_year}"
 
     return from_date, to_date
-
 
 def calc_ecost(kwh: float) -> str:
     """Calculate electric cost based on e-consumption"""
