@@ -1191,10 +1191,10 @@ def format_loadshedding(raw_value: str) -> str:
 
 def strip_date_range(date_str):
     if "đến" in date_str:
-        strip_date_range = date_str.split("đến")[1].strip()
+        stripped_date = date_str.split("đến")[1].strip()
     else:
-        strip_date_range = date_str.strip()
-    return parser.parse(strip_date_range, dayfirst=True)
+        stripped_date = date_str.strip()
+    return parser.parse(stripped_date, dayfirst=True)
 
 async def fetch_with_retries(
     url, headers, params, max_retries=3, session=None, allow_empty=False, api_name="API"
