@@ -522,12 +522,12 @@ class EVNAPI:
 
         resp_json = resp_json["data"]["sanluong_tungngay"]
 
-        from_date = parser.parse(resp_json[0]["ngayFull"], dayfirst=True)
-        to_date = parser.parse(
-            resp_json[(-2 if len(resp_json) > 2 else 0)]["ngayFull"], dayfirst=True
+        from_date = strip_date_range(resp_json[0]["ngayFull"])
+        to_date = strip_date_range(
+            resp_json[(-2 if len(resp_json) > 2 else 0)]["ngayFull"]
         )
-        previous_date = parser.parse(
-            resp_json[(-3 if len(resp_json) > 3 else 0)]["ngayFull"], dayfirst=True
+        previous_date = strip_date_range(
+            resp_json[(-3 if len(resp_json) > 3 else 0)]["ngayFull"]
         )
 
         econ_total_new = round(
@@ -1188,6 +1188,13 @@ def format_loadshedding(raw_value: str) -> str:
     
     except Exception as e:
         return STATUS_LOADSHEDDING
+
+def strip_date_range(date_str):
+    if "đến" in date_str:
+        stripped_date = date_str.split("đến")[1].strip()
+    else:
+        stripped_date = date_str.strip()
+    return parser.parse(stripped_date, dayfirst=True)
 
 async def fetch_with_retries(
     url, headers, params, max_retries=3, session=None, allow_empty=False, api_name="API"
