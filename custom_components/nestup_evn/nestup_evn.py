@@ -51,17 +51,26 @@ from .types import EVN_NAME, VIETNAM_EVN_AREA, Area
 
 _LOGGER = logging.getLogger(__name__)
 
+def create_ssl_context():
+    """Create SSL context with cipher settings"""
+    context = ssl.create_default_context()
+    context.set_ciphers("ALL:@SECLEVEL=1")
+    return context
+
+def read_evn_branches_file(file_path):
+    """Read EVN branches file synchronously"""
+    with open(file_path) as f:
+        return json.load(f)
 
 class EVNAPI:
     def __init__(self, hass: HomeAssistant, is_new_session=False):
         """Construct EVNAPI wrapper."""
-
+        self.hass = hass  # Store hass instance
         self._session = (
             async_create_clientsession(hass)
             if is_new_session
             else async_get_clientsession(hass)
         )
-
         self._evn_area = {}
 
     async def login(self, evn_area, username, password, customer_id) -> str:
@@ -178,8 +187,7 @@ class EVNAPI:
 
         payload = {"u": username, "p": password}
 
-        ssl_context = ssl.create_default_context()
-        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+        ssl_context = await self.hass.async_add_executor_job(create_ssl_context)
 
         resp = await self._session.post(
             url=self._evn_area.get("evn_login_url"),
@@ -235,8 +243,7 @@ class EVNAPI:
             "Authorization": f"Basic {auth_header}",
         }
 
-        ssl_context = ssl.create_default_context()
-        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+        ssl_context = await self.hass.async_add_executor_job(create_ssl_context)
 
         resp = await self._session.post(
             url=self._evn_area.get("evn_login_url"),
@@ -359,8 +366,7 @@ class EVNAPI:
             "ngayCuoi": to_date,
         }
 
-        ssl_context = ssl.create_default_context()
-        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+        ssl_context = await self.hass.async_add_executor_job(ssl.create_default_context)
 
         resp = await self._session.post(
             url=self._evn_area.get("evn_data_url"),
@@ -491,8 +497,7 @@ class EVNAPI:
             "Cookie": f"evn_session={self._evn_area.get('evn_session')}",
         }
 
-        ssl_context = ssl.create_default_context()
-        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+        ssl_context = await self.hass.async_add_executor_job(ssl.create_default_context)
 
         resp = await self._session.post(
             url=self._evn_area.get("evn_data_url"),
@@ -618,8 +623,7 @@ class EVNAPI:
             "Authorization": f"Bearer {self._evn_area.get('access_token')}",
         }
 
-        ssl_context = ssl.create_default_context()
-        ssl_context.set_ciphers("ALL:@SECLEVEL=1")
+        ssl_context = await self.hass.async_add_executor_job(ssl.create_default_context)
 
         resp = await self._session.post(
             url=self._evn_area.get("evn_data_url"),
@@ -908,6 +912,19 @@ class EVNAPI:
         )
 
         return fetched_data
+
+    async def get_evn_info(self, customer_id):
+        """Get EVN branch info"""
+        file_path = os.path.join(os.path.dirname(__file__), "evn_branches.json")
+
+        async def async_load_json():
+            try:
+                return await self.hass.async_add_executor_job(read_evn_branches_file, file_path)
+            except Exception as ex:
+                _LOGGER.error("Error loading EVN branch info: %s", str(ex))
+                return None
+
+        return await async_load_json()
 
 async def json_processing(resp):
     resp_json: dict = {}
@@ -1216,4 +1233,31 @@ async def fetch_with_retries(
         except Exception as e:
             _LOGGER.error(f"Attempt {attempt + 1}/{max_retries} encountered an error: {str(e)}")
     
-    raise Exception(f"Failed to fetch data of {api_name} after {max_retries} attempts.")        
+    raise Exception(f"Failed to fetch data of {api_name} after {max_retries} attempts.")
+
+def get_evn_info_sync(customer_id: str, branches_data=None):
+    """Synchronous helper to get EVN info"""
+    for index, each_area in enumerate(VIETNAM_EVN_AREA):
+        for each_pattern in each_area.pattern:
+            if each_pattern in customer_id:
+                evn_branch = "Unknown"
+
+                if branches_data:
+                    for evn_id in branches_data:
+                        if evn_id in customer_id:
+                            evn_branch = branches_data[evn_id]
+
+                return {
+                    "status": CONF_SUCCESS,
+                    "customer_id": customer_id,
+                    "evn_area": asdict(each_area),
+                    "evn_name": each_area.name,
+                    "evn_location": each_area.location,
+                    "evn_branch": evn_branch,
+                }
+
+    return {"status": CONF_ERR_NOT_SUPPORTED}
+
+async def get_evn_info(hass: HomeAssistant, customer_id: str):
+    """Async wrapper for EVN info"""
+    return await hass.async_add_executor_job(get_evn_info_sync, customer_id)

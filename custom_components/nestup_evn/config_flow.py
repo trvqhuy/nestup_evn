@@ -110,18 +110,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             },
         )
 
-    async def async_step_evn_info(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_evn_info(self, user_input=None):
         """Handle EVN-info config flow by the user."""
+        evn_info = await nestup_evn.get_evn_info(self.hass, self._user_data[CONF_CUSTOMER_ID])
 
         self._errors = {}
 
         if user_input is not None:
 
             return await self.async_step_fulfill_data()
-
-        evn_info = nestup_evn.get_evn_info(self._user_data[CONF_CUSTOMER_ID])
 
         if evn_info.get("status") is CONF_SUCCESS:
             self._user_data[CONF_AREA] = evn_info["evn_area"]
