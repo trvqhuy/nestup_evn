@@ -1232,7 +1232,7 @@ async def fetch_with_retries(
         
         except Exception as e:
             _LOGGER.error(f"Attempt {attempt + 1}/{max_retries} encountered an error: {str(e)}")
-    
+
     raise Exception(f"Failed to fetch data of {api_name} after {max_retries} attempts.")
 
 def get_evn_info_sync(customer_id: str, branches_data=None):
