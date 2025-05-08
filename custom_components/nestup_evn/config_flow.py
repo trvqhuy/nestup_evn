@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 from typing import Any
+import os
 
 import voluptuous as vol
 
@@ -59,6 +60,19 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._user_data = {}
         self._api = None
         self._errors = {}
+        self._branches_data = None
+
+    async def _load_branches_data(self):
+        """Load branches data asynchronously."""
+        try:
+            file_path = os.path.join(os.path.dirname(nestup_evn.__file__), "evn_branches.json")
+            self._branches_data = await self.hass.async_add_executor_job(
+                nestup_evn.read_evn_branches_file, file_path
+            )
+        except Exception as ex:
+            _LOGGER.error("Error loading branches data: %s", str(ex))
+            return None
+        return self._branches_data
 
     async def async_step_fulfill_data(
         self, user_input: dict[str, Any] | None = None
@@ -110,18 +124,23 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             },
         )
 
-    async def async_step_evn_info(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_evn_info(self, user_input=None):
         """Handle EVN-info config flow by the user."""
+        # Load branches data if not already loaded
+        if self._branches_data is None:
+            await self._load_branches_data()
+
+        # Get EVN info using the loaded branches data
+        evn_info = nestup_evn.get_evn_info_sync(
+            self._user_data[CONF_CUSTOMER_ID],
+            self._branches_data
+        )
 
         self._errors = {}
 
         if user_input is not None:
 
             return await self.async_step_fulfill_data()
-
-        evn_info = nestup_evn.get_evn_info(self._user_data[CONF_CUSTOMER_ID])
 
         if evn_info.get("status") is CONF_SUCCESS:
             self._user_data[CONF_AREA] = evn_info["evn_area"]
