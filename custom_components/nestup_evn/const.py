@@ -49,10 +49,9 @@ STATUS_LOADSHEDDING = "Không có lịch cắt điện"
 VIETNAM_ECOST_VAT = 8  # in %
 VIETNAM_ECOST_STAGES = {
     # kWh : VND
-    0: 1984,
-    50: 2050,
-    100: 2380,
-    200: 2998,
-    300: 3350,
-    400: 3460,
+    0: 1901,
+    100: 2289,
+    200: 2894,
+    400: 3456,
+    700: 3844,
 }
